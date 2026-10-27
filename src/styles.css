@@ -72,15 +72,9 @@ nav button[aria-current="true"]{background:var(--accent);color:var(--accent-ink)
 .g-x{background:var(--bg);color:var(--muted)}
 .text{flex:1;min-height:0;overflow-y:auto;display:flex;align-items:center;font-family:var(--display);font-size:clamp(1.3rem,5.2vw,1.75rem);line-height:1.38;margin:0;text-wrap:pretty}
 .note-bottom{flex:none;display:grid;gap:12px}
-.metoo-block{display:grid;gap:6px}
-.metoo{font-size:.88rem;color:var(--muted)}
-.metoo b{color:var(--accent);font-variant-numeric:tabular-nums}
-.bar{height:6px;background:var(--soft);border-radius:6px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent);border-radius:6px;transition:width .5s ease}
 .reacts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .reacts.all{grid-template-columns:repeat(4,minmax(0,1fr))}
-.note.open .metoo-block{display:none}
-.react.more{border-style:dashed;color:var(--muted)}
+.note.open .react.more{border-style:dashed;color:var(--muted)}
 .react.more .e{font-size:1.15rem;font-weight:700;color:var(--accent)}
 .react{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:6px 4px;display:grid;justify-items:center;gap:1px;font-size:.7rem;line-height:1.2;min-width:0;transition:background .15s,border-color .15s,transform .1s}
 .react .e{font-size:1.15rem}
@@ -167,7 +161,7 @@ textarea{width:100%;min-height:140px;resize:vertical;border:1px solid var(--line
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;z-index:30;max-width:calc(100% - 32px)}
 
 @media (max-width:420px){.brand{font-size:1.3rem}.brand small{display:none}nav button{padding:7px 8px;font-size:.8rem}.react{font-size:.64rem}}
-@media (max-height:700px){.text{font-size:1.15rem}.note{gap:10px;padding-top:16px}.react .e{font-size:1rem}.metoo-block{display:none}}
+@media (max-height:700px){.text{font-size:1.15rem}.note{gap:10px;padding-top:16px}.react .e{font-size:1rem}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}.deck{scroll-behavior:auto}}
 
 /* Profile */

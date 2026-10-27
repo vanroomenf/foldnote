@@ -282,10 +282,7 @@ function Reader({ onReport, onWrite }) {
 
 function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, first }) {
   const { lang, t } = useLang();
-  const reacted = Object.keys(selected).length > 0;
   const count = (k) => secret.r[k] + (selected[k] ? 1 : 0);
-  const pct = Math.round((count("metoo") / (secret.views + (reacted ? 1 : 0))) * 100);
-  const [num, rest] = t.metooLine(pct);
   const [open, setOpen] = useState(false);
 
   // The card shows this secret's most-used reactions (order fixed from the
@@ -317,10 +314,6 @@ function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, f
       <p className="text">{secret[lang] || secret.en}</p>
 
       <div className="note-bottom">
-        <div className="metoo-block">
-          <div className="metoo"><b>{num}</b>{rest}</div>
-          <div className="bar"><i style={{ width: Math.min(pct, 100) + "%" }} /></div>
-        </div>
         <div className={"reacts" + (open ? " all" : "")} aria-label={open ? t.allReactions : undefined}>
           {shown.map(reactButton)}
           <button className="react more" aria-expanded={open} aria-pressed={!open && extraPicked.length > 0} onClick={() => setOpen((o) => !o)}>
