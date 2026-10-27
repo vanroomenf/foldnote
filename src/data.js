@@ -35,7 +35,16 @@ export const QUICK_REACTIONS = 4;
 export const GENDERS = ["m", "f", "nb", "x"];
 export const AGE_BANDS = ["18–19", "20–29", "30–39", "40–49", "50–59", "60+"];
 export const COUNTRIES = ["CH", "IT", "DE", "FR", "AT", "ES", "PT", "GB", "IE", "US", "CA", "AU"];
-export const AVATARS = ["🦉", "🦊", "🐢", "🐙", "🌙", "🌵", "🍋", "🪐", "🐝", "🍄", "🌊", "🎈"];
+export const AVATARS = [
+  // animals
+  "🦉", "🦊", "🐢", "🐙", "🐝", "🐧", "🦔", "🐨", "🦦", "🐸", "🦋", "🐳", "🦩", "🐌", "🦥", "🐞",
+  // nature and sky
+  "🌙", "🌵", "🍄", "🌊", "🪐", "🌻", "🍁", "🌈", "⛰️", "❄️", "🔥", "⭐",
+  // food
+  "🍋", "🍉", "🥑", "🍩", "🍓", "🧁",
+  // things
+  "🎈", "🎧", "📚", "🎨", "🪁", "🧩", "🕯️", "🎲", "🪴", "☕", "🧸", "🔮",
+];
 
 // Sample content. In production these come from your backend after moderation,
 // written in one language and translated for readers of the other languages.
