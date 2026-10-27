@@ -424,16 +424,30 @@ STRINGS.it.mine = {
 /* ---------- where to read from ---------- */
 
 STRINGS.en.where = {
-  label: "Secrets from",
+  title: "Where you read from",
+  lede: "Pick one or more countries, or the whole world. Secrets always appear in the language they were written in.",
+  byLanguage: "Quick pick by language",
+  byCountry: "Countries",
+  change: "Change",
+  summaryWorld: "You're reading secrets from everywhere.",
+  summary: (n) => (n === 1 ? "You're reading secrets from 1 country." : `You're reading secrets from ${n} countries.`),
+  label: "From",
   world: "The whole world",
   emptyTitle: "No secrets here yet.",
-  emptyText: "Nobody from this country has posted in this category yet. Try another one, or read from the whole world.",
+  emptyText: "Nobody from the places you picked has posted in this category yet. Try another one, or read from the whole world.",
   seeWorld: "Read from the whole world",
 };
 STRINGS.it.where = {
-  label: "Segreti da",
+  title: "Da dove leggi i segreti",
+  lede: "Scegli una o più nazioni, oppure tutto il mondo. I segreti si vedono sempre nella lingua in cui sono stati scritti.",
+  byLanguage: "Scelta rapida per lingua",
+  byCountry: "Nazioni",
+  change: "Cambia",
+  summaryWorld: "Stai leggendo segreti da tutto il mondo.",
+  summary: (n) => (n === 1 ? "Stai leggendo segreti da 1 nazione." : `Stai leggendo segreti da ${n} nazioni.`),
+  label: "Da",
   world: "Tutto il mondo",
   emptyTitle: "Ancora nessun segreto qui.",
-  emptyText: "Nessuno da questa nazione ha ancora scritto in questa categoria. Provane un'altra, o leggi da tutto il mondo.",
+  emptyText: "Nessuno dai posti che hai scelto ha ancora scritto in questa categoria. Provane un'altra, o leggi da tutto il mondo.",
   seeWorld: "Leggi da tutto il mondo",
 };

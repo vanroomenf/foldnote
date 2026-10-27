@@ -34,7 +34,7 @@ By design, Foldnote has no private messages, comments or followers, so nobody ca
 
 ## Language and countries
 
-The interface follows the phone's language (`navigator.languages`), falling back to English. Secrets are never translated: each one is shown in the language its author wrote it in. At the top of the reader you choose where to read secrets from, a single country or the whole world (it starts with the country in your profile).
+The interface follows the phone's language (`navigator.languages`), falling back to English. Secrets are never translated: each one is shown in the language its author wrote it in. Under Me you choose where to read secrets from: the whole world, or one or more countries, with quick picks by language (for example Italian adds Italy and Switzerland). It starts with the country in your profile, and the reader shows the current choice with a shortcut to change it.
 
 ## Before going live
 
