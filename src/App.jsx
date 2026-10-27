@@ -42,14 +42,18 @@ function countryName(code, lang) {
 
 const fmt = (n, lang) => n.toLocaleString(lang === "it" ? "it-CH" : "en-GB");
 
-/* ---------- logo: a note with its corner folded down ---------- */
+/* ---------- logo: a little folded card with a heart, like a note passed in class ---------- */
 
 function Logo() {
   return (
     <svg className="logo" viewBox="0 0 32 32" aria-hidden="true">
-      <path className="logo-paper" d="M6 4h14l6 6v18H6z" />
-      <path className="logo-fold" d="M20 4v6h6z" />
-      <path className="logo-lines" d="M10 15h12M10 19h12M10 23h7" />
+      <g transform="rotate(-8 16 16)">
+        <path className="logo-back" d="M19 6L27 9.5L27 24.5L19 27Z" />
+        <path className="logo-front" d="M5 6L19 6L19 27L5 27Z" />
+        <path className="logo-ink" d="M8 11.5h8M8 21.5h6" />
+        <path className="logo-heart" transform="translate(12 16) scale(1.25)"
+          d="M0 2.6c-1.2-.9-2.6-1.9-2.6-3.2a1.3 1.3 0 0 1 2.6-.6a1.3 1.3 0 0 1 2.6.6c0 1.3-1.3 2.3-2.6 3.2z" />
+      </g>
     </svg>
   );
 }
@@ -79,7 +83,7 @@ export default function App() {
     <LangContext.Provider value={{ lang, t }}>
       <div className="app">
         <header className="topbar">
-          <div className="brand"><Logo /><span>Foldnote<small>{t.tagline}</small></span></div>
+          <div className="brand"><Logo /><span>Foldnote</span></div>
           <nav aria-label="Sections">
             {["read", "write", "me"].map((k) => (
               <button key={k} aria-current={tab === k} onClick={() => setTab(k)}>{t.tabs[k]}</button>
