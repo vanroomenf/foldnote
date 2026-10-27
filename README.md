@@ -42,3 +42,5 @@ The app reads the device language (`navigator.languages`) and uses the first one
 - Run the filter on the server too, add an AI context check, and keep human review before publishing. No word filter catches everything.
 - Verify accounts (for example by phone number) so a banned user can't simply sign up again.
 - Replace the ad slide (`AdSlide` in `App.jsx`) with your ad network.
+
+Live version: https://vanroomenf.github.io/foldnote/
