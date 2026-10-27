@@ -19,7 +19,14 @@ export const REACTIONS = [
   { key: "hug", emoji: "🫂" },
   { key: "laugh", emoji: "😂" },
   { key: "wow", emoji: "😮" },
+  { key: "strong", emoji: "💪" },
+  { key: "safe", emoji: "🤐" },
 ];
+
+export const GENDERS = ["m", "f", "nb", "x"];
+export const AGE_BANDS = ["18–19", "20–29", "30–39", "40–49", "50–59", "60+"];
+export const COUNTRIES = ["CH", "IT", "DE", "FR", "AT", "ES", "PT", "GB", "IE", "US", "CA", "AU"];
+export const AVATARS = ["🦉", "🦊", "🐢", "🐙", "🌙", "🌵", "🍋", "🪐", "🐝", "🍄", "🌊", "🎈"];
 
 // Sample content. In production these come from your backend after moderation,
 // written in one language and translated for readers of the other languages.
@@ -91,3 +98,33 @@ export const SECRETS = [
     en: "I text “on my way” before I've even got out of the shower.",
     it: "Rispondo «sto arrivando» quando non sono ancora uscito dalla doccia." },
 ];
+
+// Prototype extras: which authors accept messages, non-binary authors,
+// and starting counts for the newer reactions.
+const OPEN_TO_MESSAGES = new Set([16, 5, 8, 10, 22, 14, 21, 3, 9]);
+const NON_BINARY = new Set([9, 22]);
+for (const s of SECRETS) {
+  s.dm = OPEN_TO_MESSAGES.has(s.id);
+  if (NON_BINARY.has(s.id)) s.gender = "nb";
+  s.r.strong ??= Math.round(s.r.hug * 0.35 + s.views * 0.01);
+  s.r.safe ??= Math.round(s.views * 0.04 + s.r.wow * 0.3);
+}
+
+// One example of someone writing to you about your own secret, so the
+// recipient's side of messaging can be tried in the prototype.
+export const SAMPLE_INCOMING = {
+  id: "c-sample",
+  role: "author",
+  status: "pending",
+  secret: {
+    en: "When it rains I feel calmer than on sunny days, and I've never told anyone.",
+    it: "Quando piove mi sento più tranquillo che nelle giornate di sole, e non l'ho mai detto a nessuno.",
+  },
+  other: { nickname: "nightowl_92", avatar: "🦉", gender: "f", age: "30–39", country: "IT" },
+  messages: [
+    { from: "them", text: {
+      en: "Hi, I read your secret about the rain. It's exactly the same for me. Would you like to talk about it?",
+      it: "Ciao, ho letto il tuo segreto sulla pioggia. Per me è esattamente uguale. Ti va di parlarne?",
+    } },
+  ],
+};
