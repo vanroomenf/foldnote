@@ -11,6 +11,13 @@ npm run dev
 
 Then open the address Vite prints (usually http://localhost:5173).
 
+## Publish online (GitHub Pages)
+
+Every push to `main` builds the app and publishes it with GitHub Actions (`.github/workflows/pages.yml`).
+To switch it on once: repository **Settings → Pages → Source: GitHub Actions**.
+With a free GitHub account this needs a public repository; private repositories need GitHub Pro or a team plan.
+The site will be at `https://<username>.github.io/foldnote/`.
+
 ## Files
 
 | File | What's in it |
