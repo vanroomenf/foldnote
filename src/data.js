@@ -16,7 +16,7 @@ export const CATEGORIES = [
 
 export const REACTIONS = [
   { key: "metoo", emoji: "🙋" },
-  { key: "hug", emoji: "🤗" },
+  { key: "hug", emoji: "🫶" },
   { key: "laugh", emoji: "😂" },
   { key: "wow", emoji: "😮" },
   { key: "strong", emoji: "💪" },
