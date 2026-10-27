@@ -1,4 +1,4 @@
-# Hush
+# Foldnote
 
 Prototype of an anonymous secrets app: one secret per screen (swipe up for the next), twelve kind reactions instead of comments (each secret shows its four most used, the rest under "More"), categories, a private profile (nickname, avatar, gender including non-binary, age band, country) that only its owner sees, a safety filter, and a zero-tolerance rules flow.
 
@@ -23,7 +23,7 @@ Then open the address Vite prints (usually http://localhost:5173).
 
 ## No contact between users
 
-By design, Hush has no private messages, comments or followers, so nobody can use a secret to reach its author. The filter also blocks invitations to get in touch ("DM me", "scrivimi", social handles), and trying to contact someone is an immediate ban.
+By design, Foldnote has no private messages, comments or followers, so nobody can use a secret to reach its author. The filter also blocks invitations to get in touch ("DM me", "scrivimi", social handles), and trying to contact someone is an immediate ban.
 
 ## Language
 

@@ -53,7 +53,7 @@ export const STRINGS = {
       properOk: "No suspicious proper nouns",
       disguisedBad: (l) => ["Written to get past the filter: ", l, ". Numbers, symbols or spaces inside a word aren't allowed. Doing this on purpose gets you banned."],
       disguisedOk: "No disguised words",
-      contactBad: "Contains contact details or an invitation to get in touch. Hush has no contact between users.",
+      contactBad: "Contains contact details or an invitation to get in touch. Foldnote has no contact between users.",
       contactOk: "No contact details",
       threat: "Contains a threat.",
       insult: "Contains an insult or offensive word.",
@@ -72,12 +72,12 @@ export const STRINGS = {
     yourSecrets: "Your secrets",
     inReview: "In review",
 
-    rulesTitle: "The Hush rules",
+    rulesTitle: "The Foldnote rules",
     rules: [
       ["Only talk about yourself.", "No names, nicknames, social handles or details that identify another person."],
       ["No personal data.", "Not yours, not anyone else's: phone numbers, emails, addresses, links."],
       ["No insults, hate or threats.", "You can share your anger. You can't aim it at someone."],
-      ["No explicit or illegal content.", "Hush is for adults, but it stays a clean place."],
+      ["No explicit or illegal content.", "Foldnote is for adults, but it stays a clean place."],
       ["Adults only.", "You must be at least 18."],
     ],
     breakTitle: "What happens if someone breaks them",
@@ -106,7 +106,7 @@ export const STRINGS = {
     banTitle: "Your account has been closed.",
     banLede: "One of your secrets contained another person's name, disguised to get past the filter. That breaks rule 1, which you accepted when you joined.",
     banWhat: "What this means",
-    banText: "You can no longer read or post on Hush with this phone number. The secret was deleted and never published.",
+    banText: "You can no longer read or post on Foldnote with this phone number. The secret was deleted and never published.",
     banAppeal: "If you think this is a mistake, you can ask for a review once.",
     banBack: "Back to the app (demo only)",
   },
@@ -148,7 +148,7 @@ export const STRINGS = {
       properOk: "Nessun nome proprio sospetto",
       disguisedBad: (l) => ["Scritto per aggirare il filtro: ", l, ". Numeri, simboli o spazi dentro una parola non sono ammessi. Farlo apposta porta all'espulsione."],
       disguisedOk: "Nessuna parola camuffata",
-      contactBad: "Contiene un contatto o un invito a farsi contattare. Su Hush gli utenti non possono contattarsi.",
+      contactBad: "Contiene un contatto o un invito a farsi contattare. Su Foldnote gli utenti non possono contattarsi.",
       contactOk: "Nessun dato di contatto",
       threat: "Contiene una minaccia.",
       insult: "Contiene un insulto o una parola offensiva.",
@@ -167,12 +167,12 @@ export const STRINGS = {
     yourSecrets: "I tuoi segreti",
     inReview: "In revisione",
 
-    rulesTitle: "Le regole di Hush",
+    rulesTitle: "Le regole di Foldnote",
     rules: [
       ["Parla solo di te.", "Niente nomi, soprannomi, profili social o dettagli che fanno riconoscere un'altra persona."],
       ["Niente dati personali.", "Né tuoi né di altri: numeri di telefono, email, indirizzi, link."],
       ["Niente insulti, odio o minacce.", "Puoi raccontare la tua rabbia, non usarla contro qualcuno."],
-      ["Niente contenuti espliciti o illegali.", "Hush è per adulti, ma resta un posto pulito."],
+      ["Niente contenuti espliciti o illegali.", "Foldnote è per adulti, ma resta un posto pulito."],
       ["Solo maggiorenni.", "Bisogna avere almeno 18 anni."],
     ],
     breakTitle: "Cosa succede se qualcuno sgarra",
@@ -201,7 +201,7 @@ export const STRINGS = {
     banTitle: "Il tuo account è stato chiuso.",
     banLede: "Un tuo segreto conteneva il nome di un'altra persona, camuffato per aggirare il filtro. È una violazione della regola 1, che hai accettato all'ingresso.",
     banWhat: "Cosa significa",
-    banText: "Non puoi più leggere né scrivere su Hush con questo numero di telefono. Il segreto è stato eliminato e non è mai stato pubblicato.",
+    banText: "Non puoi più leggere né scrivere su Foldnote con questo numero di telefono. Il segreto è stato eliminato e non è mai stato pubblicato.",
     banAppeal: "Se pensi che sia un errore, puoi chiedere una revisione una sola volta.",
     banBack: "Torna all'app (solo demo)",
   },
@@ -220,7 +220,7 @@ Object.assign(STRINGS.en, {
   allReactions: "All reactions",
 
   setupTitle: "Create your profile",
-  setupLede: "Your secrets are always anonymous. Nobody can see your profile, and nobody on Hush can contact you.",
+  setupLede: "Your secrets are always anonymous. Nobody can see your profile, and nobody on Foldnote can contact you.",
   nickname: "Nickname",
   nicknameHint: "Only you see it. 3 to 20 letters, numbers, dots or underscores.",
   nicknameBad: "Use 3 to 20 letters, numbers, dots or underscores, with no contact details or offensive words.",
@@ -241,7 +241,7 @@ Object.assign(STRINGS.en, {
   privacy: [
     ["Your secrets", "Always anonymous. Readers only see gender, age band and country."],
     ["Your profile", "Only you see it. It fills in gender, age band and country on your secrets for you."],
-    ["Contact", "Hush has no private messages, no followers and no comments. Nobody can reach you through the app, and you can't reach anyone."],
+    ["Contact", "Foldnote has no private messages, no followers and no comments. Nobody can reach you through the app, and you can't reach anyone."],
   ],
   editProfile: "Edit profile",
 
@@ -251,7 +251,7 @@ Object.assign(STRINGS.en, {
     ["No personal data.", "Not yours, not anyone else's: phone numbers, emails, addresses, links."],
     ["No insults, hate or threats.", "You can share your anger. You can't aim it at someone."],
     ["No contact, ever.", "Don't try to reach the author of a secret or invite people to contact you, in any form. That's an immediate ban."],
-    ["No explicit or illegal content.", "Hush is for adults, but it stays a clean place."],
+    ["No explicit or illegal content.", "Foldnote is for adults, but it stays a clean place."],
     ["Adults only.", "You must be at least 18."],
   ],
 });
@@ -267,7 +267,7 @@ Object.assign(STRINGS.it, {
   allReactions: "Tutte le reazioni",
 
   setupTitle: "Crea il tuo profilo",
-  setupLede: "I tuoi segreti sono sempre anonimi. Nessuno vede il tuo profilo e nessuno su Hush può contattarti.",
+  setupLede: "I tuoi segreti sono sempre anonimi. Nessuno vede il tuo profilo e nessuno su Foldnote può contattarti.",
   nickname: "Nickname",
   nicknameHint: "Lo vedi solo tu. Da 3 a 20 tra lettere, numeri, punti o trattini bassi.",
   nicknameBad: "Usa da 3 a 20 tra lettere, numeri, punti o trattini bassi, senza contatti né parole offensive.",
@@ -288,7 +288,7 @@ Object.assign(STRINGS.it, {
   privacy: [
     ["I tuoi segreti", "Sempre anonimi. Chi legge vede solo genere, fascia d'età e Paese."],
     ["Il tuo profilo", "Lo vedi solo tu. Serve a compilare in automatico genere, fascia d'età e Paese sui tuoi segreti."],
-    ["Contatti", "Hush non ha messaggi privati, follower o commenti. Nessuno può raggiungerti tramite l'app, e tu non puoi raggiungere nessuno."],
+    ["Contatti", "Foldnote non ha messaggi privati, follower o commenti. Nessuno può raggiungerti tramite l'app, e tu non puoi raggiungere nessuno."],
   ],
   editProfile: "Modifica profilo",
 
@@ -298,7 +298,7 @@ Object.assign(STRINGS.it, {
     ["Niente dati personali.", "Né tuoi né di altri: numeri di telefono, email, indirizzi, link."],
     ["Niente insulti, odio o minacce.", "Puoi raccontare la tua rabbia, non usarla contro qualcuno."],
     ["Nessun contatto, mai.", "Non cercare l'autore di un segreto e non invitare nessuno a contattarti, in nessuna forma. È espulsione immediata."],
-    ["Niente contenuti espliciti o illegali.", "Hush è per adulti, ma resta un posto pulito."],
+    ["Niente contenuti espliciti o illegali.", "Foldnote è per adulti, ma resta un posto pulito."],
     ["Solo maggiorenni.", "Bisogna avere almeno 18 anni."],
   ],
 });

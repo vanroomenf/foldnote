@@ -1,4 +1,4 @@
-/* Hush styles.
+/* Foldnote styles.
    Layout: a phone-width app shell. The reader is a vertical deck of full-height
    slides, one folded note per screen, snapped as you swipe up. */
 :root{
@@ -33,7 +33,11 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,.deck:focus-visi
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
 .topbar{flex:none;padding-block:12px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
-.brand{font-family:var(--display);font-size:1.6rem;letter-spacing:.01em;line-height:1.1}
+.brand{font-family:var(--display);font-size:1.6rem;letter-spacing:.01em;line-height:1.1;display:flex;align-items:center;gap:8px}
+.logo{flex:none;width:1.25em;height:1.25em}
+.logo-paper{fill:var(--paper);stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.logo-fold{fill:var(--accent);stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.logo-lines{fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round}
 .brand small{display:block;font-family:var(--body);font-size:.7rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
 nav{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px}
 nav button{border:0;background:transparent;color:var(--muted);padding:7px 12px;border-radius:999px;font-size:.9rem}

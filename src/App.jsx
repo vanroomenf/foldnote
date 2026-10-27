@@ -10,12 +10,12 @@ import { STRINGS, SUPPORTED, LANGUAGE_NAMES, deviceLanguage } from "./i18n.js";
 const storage = {
   get(key, fallback) {
     try {
-      const v = localStorage.getItem("hush_" + key);
+      const v = localStorage.getItem("foldnote_" + key);
       return v ? JSON.parse(v) : fallback;
     } catch { return fallback; }
   },
   set(key, value) {
-    try { localStorage.setItem("hush_" + key, JSON.stringify(value)); } catch {}
+    try { localStorage.setItem("foldnote_" + key, JSON.stringify(value)); } catch {}
   },
 };
 
@@ -42,6 +42,18 @@ function countryName(code, lang) {
 
 const fmt = (n, lang) => n.toLocaleString(lang === "it" ? "it-CH" : "en-GB");
 
+/* ---------- logo: a note with its corner folded down ---------- */
+
+function Logo() {
+  return (
+    <svg className="logo" viewBox="0 0 32 32" aria-hidden="true">
+      <path className="logo-paper" d="M6 4h14l6 6v18H6z" />
+      <path className="logo-fold" d="M20 4v6h6z" />
+      <path className="logo-lines" d="M10 15h12M10 19h12M10 23h7" />
+    </svg>
+  );
+}
+
 /* ---------- app ---------- */
 
 export default function App() {
@@ -67,7 +79,7 @@ export default function App() {
     <LangContext.Provider value={{ lang, t }}>
       <div className="app">
         <header className="topbar">
-          <div className="brand">Hush<small>{t.tagline}</small></div>
+          <div className="brand"><Logo /><span>Foldnote<small>{t.tagline}</small></span></div>
           <nav aria-label="Sections">
             {["read", "write", "me"].map((k) => (
               <button key={k} aria-current={tab === k} onClick={() => setTab(k)}>{t.tabs[k]}</button>
@@ -95,7 +107,7 @@ export default function App() {
         {accepted && !profile && (
           <div className="overlay" role="dialog" aria-modal="true" aria-labelledby="setup-title">
             <div className="overlay-inner">
-              <div className="brand">Hush</div>
+              <div className="brand"><Logo /><span>Foldnote</span></div>
               <h1 id="setup-title">{t.setupTitle}</h1>
               <p className="lede">{t.setupLede}</p>
               <ProfileForm onSave={setProfile} submitLabel={t.createProfile} />
@@ -517,7 +529,7 @@ function Welcome({ onEnter }) {
   return (
     <div className="overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
       <div className="overlay-inner">
-        <div className="brand">Hush</div>
+        <div className="brand"><Logo /><span>Foldnote</span></div>
         <h1 id="welcome-title">{t.welcomeTitle}</h1>
         <p className="lede">{t.welcomeLede}</p>
         <section className="card">
@@ -545,7 +557,7 @@ function Banned({ onBack }) {
   return (
     <div className="overlay ban" role="dialog" aria-modal="true" aria-labelledby="ban-title">
       <div className="overlay-inner">
-        <div className="brand">Hush</div>
+        <div className="brand"><Logo /><span>Foldnote</span></div>
         <h1 id="ban-title">{t.banTitle}</h1>
         <p className="lede">{t.banLede}</p>
         <section className="card">

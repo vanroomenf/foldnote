@@ -1,4 +1,4 @@
-// Categories, reactions and sample secrets for the Hush prototype.
+// Categories, reactions and sample secrets for the Foldnote prototype.
 // Labels and texts are given per language; see i18n.js for the interface strings.
 // gender: "m" man, "f" woman, "x" prefers not to say. country: ISO code, shown in the reader's language.
 

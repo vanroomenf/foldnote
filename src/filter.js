@@ -1,4 +1,4 @@
-// Client-side safety filter for the Hush prototype.
+// Client-side safety filter for the Foldnote prototype.
 // First line of defence only: in production run the same checks on the server,
 // add an AI context check, and keep human review before anything is published.
 // Checks run in every supported language, whatever language the interface is in.
