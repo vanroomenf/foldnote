@@ -36,6 +36,8 @@ const catText = (key, lang) => {
   return c ? c[lang] || c.en : ["", ""];
 };
 
+const flag = (code) => String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
+
 function languageName(code, lang) {
   try { return new Intl.DisplayNames([lang], { type: "language" }).of(code) || code; }
   catch { return code; }
@@ -98,11 +100,10 @@ function demoReactions(sec, liveAt, now) {
 /* ---------- app ---------- */
 
 export default function App() {
-  // The app always speaks the phone's language. Posts in other languages are
-  // translated unless the reader prefers to see originals.
+  // The interface follows the phone's language. Secrets are always shown in the
+  // language they were written in; readers choose which country to read from.
   const lang = useMemo(deviceLanguage, []);
   const t = STRINGS[lang];
-  const [translate, setTranslate] = usePersistentState("translate", true);
 
   const [accepted, setAccepted] = usePersistentState("accepted", false);
   const [profile, setProfile] = usePersistentState("profile", null);
@@ -119,7 +120,7 @@ export default function App() {
   }, [toast]);
 
   return (
-    <LangContext.Provider value={{ lang, t, translate }}>
+    <LangContext.Provider value={{ lang, t }}>
       <div className="app">
         <header className="topbar">
           <div className="brand"><Logo /><span>Foldnote</span></div>
@@ -131,7 +132,7 @@ export default function App() {
         </header>
 
         {tab === "read" && (
-          <Reader onToast={setToast} onWrite={() => setTab("write")} />
+          <Reader profile={profile} onToast={setToast} onWrite={() => setTab("write")} />
         )}
         {tab === "write" && (
           <Write
@@ -147,8 +148,6 @@ export default function App() {
             onSave={setProfile}
             mySecrets={mySecrets}
             onDelete={(id) => { setMySecrets((all) => all.filter((x) => x.id !== id)); setToast(t.mine.deletedToast); }}
-            translate={translate}
-            onTranslate={setTranslate}
             onDemoBan={() => setBanned(true)}
             onReplayWelcome={() => setAccepted(false)}
           />
@@ -246,18 +245,29 @@ function ProfileForm({ initial, onSave, onCancel, submitLabel }) {
 
 /* ---------- read: one secret per screen, swipe up for the next ---------- */
 
-function Reader({ onToast, onWrite }) {
+function Reader({ profile, onToast, onWrite }) {
   const { lang, t } = useLang();
   const [category, setCategory] = useState("all");
+  const [place, setPlace] = usePersistentState("place", profile?.country || "world");
   const [mine, setMine] = usePersistentState("reactions", {});
   const [reports, setReports] = usePersistentState("reports", {}); // secret id -> { reason, details, at }
   const [reporting, setReporting] = useState(null);
   const deck = useRef(null);
 
   const list = useMemo(
-    () => (category === "all" ? SECRETS : SECRETS.filter((s) => s.cat === category)),
-    [category]
+    () => SECRETS.filter((s) => (category === "all" || s.cat === category) && (place === "world" || s.country === place)),
+    [category, place]
   );
+  // Countries in the picker, with how many secrets each has right now.
+  const places = useMemo(() => {
+    const counts = {};
+    SECRETS.forEach((s) => { counts[s.country] = (counts[s.country] || 0) + 1; });
+    const codes = [...new Set([...COUNTRIES, ...Object.keys(counts)])];
+    return codes
+      .map((c) => ({ code: c, name: countryName(c, lang), n: counts[c] || 0 }))
+      .sort((a, b) => a.name.localeCompare(b.name, lang));
+  }, [lang]);
+  const choosePlace = (p) => { setPlace(p); deck.current?.scrollTo({ top: 0 }); };
 
   const slides = useMemo(() => {
     const out = [];
@@ -288,6 +298,16 @@ function Reader({ onToast, onWrite }) {
 
   return (
     <main className="reader">
+      <label className="place" htmlFor="place">
+        <span className="place-label">{t.where.label}</span>
+        <span className="place-pick">
+          <span aria-hidden="true">{place === "world" ? "🌍" : flag(place)}</span>
+          <select id="place" value={place} onChange={(e) => choosePlace(e.target.value)}>
+            <option value="world">{t.where.world} ({SECRETS.length})</option>
+            {places.map((p) => <option key={p.code} value={p.code}>{p.name} ({p.n})</option>)}
+          </select>
+        </span>
+      </label>
       <div className="cats" role="group" aria-label={t.categories}>
         {[{ key: "all" }, ...CATEGORIES].map((c) => (
           <button key={c.key} aria-pressed={category === c.key} onClick={() => pick(c.key)}>
@@ -322,11 +342,16 @@ function Reader({ onToast, onWrite }) {
             {slide.type === "ad" && <AdSlide onNext={next} />}
             {slide.type === "end" && (
               <div className="endcard">
-                <h2>{t.endTitle}</h2>
-                <p>{t.endText}</p>
+                <h2>{list.length ? t.endTitle : t.where.emptyTitle}</h2>
+                <p>{list.length ? t.endText : t.where.emptyText}</p>
+                {place !== "world" && (
+                  <button className="ghost" onClick={() => choosePlace("world")}>🌍 {t.where.seeWorld}</button>
+                )}
                 <div className="end-actions">
                   <button className="primary" onClick={onWrite}>{t.writeOne}</button>
-                  <button className="ghost" onClick={() => deck.current?.scrollTo({ top: 0, behavior: "smooth" })}>{t.backToTop}</button>
+                  {list.length > 0 && (
+                    <button className="ghost" onClick={() => deck.current?.scrollTo({ top: 0, behavior: "smooth" })}>{t.backToTop}</button>
+                  )}
                 </div>
               </div>
             )}
@@ -350,11 +375,8 @@ function Reader({ onToast, onWrite }) {
 }
 
 function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, first, tint }) {
-  const { lang, t, translate } = useLang();
-  const foreign = secret.orig && secret.orig !== lang && secret[lang];
-  const [flipped, setFlipped] = useState(false);
-  const showOriginal = foreign && (translate ? flipped : !flipped);
-  const body = showOriginal || !foreign ? secret[secret.orig] || secret.en : secret[lang];
+  const { lang, t } = useLang();
+  const body = secret[secret.orig] || secret.en;
   const count = (k) => secret.r[k] + (selected[k] ? 1 : 0);
   const [label, setLabel] = useState(null);
 
@@ -379,16 +401,7 @@ function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, f
         <span>{countryName(secret.country, lang)}</span>
       </div>
 
-      <p className="text" lang={showOriginal || !foreign ? secret.orig : lang}>{body}</p>
-
-      {foreign && (
-        <p className="translated">
-          <span>{showOriginal ? t.tr.original(languageName(secret.orig, lang)) : t.tr.translatedFrom(languageName(secret.orig, lang))}</span>
-          <button className="link inline" onClick={() => setFlipped((f) => !f)}>
-            {showOriginal ? t.tr.showTranslation : t.tr.showOriginal}
-          </button>
-        </p>
-      )}
+      <p className="text" lang={secret.orig}>{body}</p>
 
       <div className="note-bottom">
         <div className="reacts-wrap">
@@ -447,7 +460,7 @@ function ReportSheet({ secret, onClose, onSubmit }) {
           <h2 id="report-title">{step === "reason" ? t.rep.title : t.rep.detailsTitle}</h2>
           <button className="link" onClick={onClose}>{t.cancel}</button>
         </div>
-        <blockquote className="quote">{secret[lang] || secret.en}</blockquote>
+        <blockquote className="quote" lang={secret.orig}>{secret[secret.orig] || secret.en}</blockquote>
 
         {step === "reason" && (
           <>
@@ -688,7 +701,7 @@ function MySecrets({ items, onDelete }) {
   );
 }
 
-function Me({ profile, onSave, mySecrets, onDelete, translate, onTranslate, onDemoBan, onReplayWelcome }) {
+function Me({ profile, onSave, mySecrets, onDelete, onDemoBan, onReplayWelcome }) {
   const { lang, t } = useLang();
   const [editing, setEditing] = useState(false);
 
@@ -730,18 +743,6 @@ function Me({ profile, onSave, mySecrets, onDelete, translate, onTranslate, onDe
         </div>
         <button className="ghost" onClick={onDemoBan}>{t.seeBan}</button>
         <button className="link left" onClick={onReplayWelcome}>{t.replayWelcome}</button>
-      </section>
-      <section className="card">
-        <h3>{t.tr.settingTitle}</h3>
-        <p className="intro-line">{t.tr.appLanguage(languageName(lang, lang))}</p>
-        <div className="langs" role="radiogroup" aria-label={t.tr.settingTitle}>
-          {[[true, t.tr.optTranslate], [false, t.tr.optOriginal]].map(([v, label]) => (
-            <label key={String(v)} className="agree" htmlFor={"tr-" + v}>
-              <input id={"tr-" + v} type="radio" name="translate" checked={translate === v} onChange={() => onTranslate(v)} />
-              <span>{label}</span>
-            </label>
-          ))}
-        </div>
       </section>
     </main>
   );

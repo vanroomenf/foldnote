@@ -421,25 +421,19 @@ STRINGS.it.mine = {
   demoNote: "Prototipo: la revisione dura pochi secondi e le reazioni sono simulate.",
 };
 
-/* ---------- translation ---------- */
+/* ---------- where to read from ---------- */
 
-STRINGS.en.tr = {
-  translatedFrom: (l) => `Translated · original in ${l}`,
-  original: (l) => `Original in ${l}`,
-  showOriginal: "See original",
-  showTranslation: "See translation",
-  settingTitle: "Posts in other languages",
-  appLanguage: (l) => `Foldnote uses your phone's language (${l}). Secrets written in other languages are translated for you.`,
-  optTranslate: "Translate them automatically",
-  optOriginal: "Show them in the original language",
+STRINGS.en.where = {
+  label: "Secrets from",
+  world: "The whole world",
+  emptyTitle: "No secrets here yet.",
+  emptyText: "Nobody from this country has posted in this category yet. Try another one, or read from the whole world.",
+  seeWorld: "Read from the whole world",
 };
-STRINGS.it.tr = {
-  translatedFrom: (l) => `Tradotto · originale in ${l}`,
-  original: (l) => `Originale in ${l}`,
-  showOriginal: "Vedi l'originale",
-  showTranslation: "Vedi la traduzione",
-  settingTitle: "Post in altre lingue",
-  appLanguage: (l) => `Foldnote usa la lingua del tuo telefono (${l}). I segreti scritti in altre lingue vengono tradotti per te.`,
-  optTranslate: "Traducili automaticamente",
-  optOriginal: "Mostrali in lingua originale",
+STRINGS.it.where = {
+  label: "Segreti da",
+  world: "Tutto il mondo",
+  emptyTitle: "Ancora nessun segreto qui.",
+  emptyText: "Nessuno da questa nazione ha ancora scritto in questa categoria. Provane un'altra, o leggi da tutto il mondo.",
+  seeWorld: "Leggi da tutto il mondo",
 };
