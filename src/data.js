@@ -21,7 +21,16 @@ export const REACTIONS = [
   { key: "wow", emoji: "😮" },
   { key: "strong", emoji: "💪" },
   { key: "safe", emoji: "🤐" },
+  { key: "notalone", emoji: "🤝" },
+  { key: "moved", emoji: "🥲" },
+  { key: "proud", emoji: "👏" },
+  { key: "cringe", emoji: "🫣" },
+  { key: "dead", emoji: "💀" },
+  { key: "goforit", emoji: "🔥" },
 ];
+
+// How many reactions show on a card before "More".
+export const QUICK_REACTIONS = 4;
 
 export const GENDERS = ["m", "f", "nb", "x"];
 export const AGE_BANDS = ["18–19", "20–29", "30–39", "40–49", "50–59", "60+"];
@@ -105,4 +114,12 @@ for (const s of SECRETS) {
   if (NON_BINARY.has(s.id)) s.gender = "nb";
   s.r.strong ??= Math.round(s.r.hug * 0.35 + s.views * 0.01);
   s.r.safe ??= Math.round(s.views * 0.04 + s.r.wow * 0.3);
+  // Newer reactions, weighted by category so each secret has its own top reactions.
+  const w = (cats, hi, lo) => Math.round(s.views * (cats.includes(s.cat) ? hi : lo) * (0.7 + ((s.id * 37) % 60) / 100));
+  s.r.notalone ??= w(["lump", "family", "friends", "closed", "monday"], 0.16, 0.03);
+  s.r.moved ??= w(["lump", "family", "butterflies"], 0.22, 0.02);
+  s.r.proud ??= w(["closed", "lump", "monday"], 0.13, 0.015);
+  s.r.cringe ??= w(["cringe", "lies"], 0.3, 0.03);
+  s.r.dead ??= w(["cringe", "quirks", "lies"], 0.26, 0.02);
+  s.r.goforit ??= w(["butterflies"], 0.24, 0.01);
 }

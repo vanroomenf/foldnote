@@ -1,6 +1,6 @@
 # Hush
 
-Prototype of an anonymous secrets app: one secret per screen (swipe up for the next), six kind reactions instead of comments, categories, a private profile (nickname, avatar, gender including non-binary, age band, country) that only its owner sees, a safety filter, and a zero-tolerance rules flow.
+Prototype of an anonymous secrets app: one secret per screen (swipe up for the next), twelve kind reactions instead of comments (each secret shows its four most used, the rest under "More"), categories, a private profile (nickname, avatar, gender including non-binary, age band, country) that only its owner sees, a safety filter, and a zero-tolerance rules flow.
 
 ## Run it
 

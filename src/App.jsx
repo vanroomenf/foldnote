@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
-  CATEGORIES, REACTIONS, SECRETS, GENDERS, AGE_BANDS, COUNTRIES, AVATARS,
+  CATEGORIES, REACTIONS, QUICK_REACTIONS, SECRETS, GENDERS, AGE_BANDS, COUNTRIES, AVATARS,
 } from "./data.js";
 import { analyze, isBlocked } from "./filter.js";
 import { STRINGS, SUPPORTED, LANGUAGE_NAMES, deviceLanguage } from "./i18n.js";
@@ -270,9 +270,27 @@ function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, f
   const count = (k) => secret.r[k] + (selected[k] ? 1 : 0);
   const pct = Math.round((count("metoo") / (secret.views + (reacted ? 1 : 0))) * 100);
   const [num, rest] = t.metooLine(pct);
+  const [open, setOpen] = useState(false);
+
+  // The card shows this secret's most-used reactions (order fixed from the
+  // starting counts, so buttons don't jump while you tap), plus any you picked.
+  const ranked = useMemo(
+    () => [...REACTIONS].sort((a, b) => (secret.r[b.key] ?? 0) - (secret.r[a.key] ?? 0)),
+    [secret]
+  );
+  const quick = ranked.slice(0, QUICK_REACTIONS);
+  const extraPicked = ranked.slice(QUICK_REACTIONS).filter((r) => selected[r.key]);
+  const shown = open ? ranked : quick;
+  const reactButton = (r) => (
+    <button key={r.key} className="react" aria-pressed={!!selected[r.key]} onClick={() => onReact(r.key)}>
+      <span className="e" aria-hidden="true">{r.emoji}</span>
+      <span className="l">{t.reactions[r.key]}</span>
+      <span className="n">{fmt(count(r.key), lang)}</span>
+    </button>
+  );
 
   return (
-    <article className="note">
+    <article className={"note" + (open ? " open" : "")}>
       <div className="meta">
         <button className="cattag" onClick={() => onCategory(secret.cat)}>{catText(secret.cat, lang)[0]}</button>
         <span className={"gender g-" + secret.gender}>{t.gender[secret.gender]}</span>
@@ -287,14 +305,13 @@ function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, f
           <div className="metoo"><b>{num}</b>{rest}</div>
           <div className="bar"><i style={{ width: Math.min(pct, 100) + "%" }} /></div>
         </div>
-        <div className="reacts">
-          {REACTIONS.map((r) => (
-            <button key={r.key} className="react" aria-pressed={!!selected[r.key]} onClick={() => onReact(r.key)}>
-              <span className="e" aria-hidden="true">{r.emoji}</span>
-              <span className="l">{t.reactions[r.key]}</span>
-              <span className="n">{fmt(count(r.key), lang)}</span>
-            </button>
-          ))}
+        <div className={"reacts" + (open ? " all" : "")} aria-label={open ? t.allReactions : undefined}>
+          {shown.map(reactButton)}
+          <button className="react more" aria-expanded={open} aria-pressed={!open && extraPicked.length > 0} onClick={() => setOpen((o) => !o)}>
+            <span className="e" aria-hidden="true">{open ? "−" : extraPicked.length ? extraPicked.map((r) => r.emoji).slice(0, 2).join("") : "+"}</span>
+            <span className="l">{open ? t.lessReactions : t.moreReactions}</span>
+            <span className="n">{open ? "" : REACTIONS.length - shown.length}</span>
+          </button>
         </div>
         <div className="foot">
           <button className={"nexthint" + (first ? " pulse" : "")} onClick={onNext}>
