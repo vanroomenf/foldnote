@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
-  CATEGORIES, REACTIONS, SECRETS, GENDERS, AGE_BANDS, COUNTRIES, AVATARS, SAMPLE_INCOMING,
+  CATEGORIES, REACTIONS, SECRETS, GENDERS, AGE_BANDS, COUNTRIES, AVATARS,
 } from "./data.js";
 import { analyze, isBlocked } from "./filter.js";
 import { STRINGS, SUPPORTED, LANGUAGE_NAMES, deviceLanguage } from "./i18n.js";
@@ -26,7 +26,6 @@ function usePersistentState(key, initial) {
 }
 
 const AD_EVERY = 5;
-const DEMO_REPLY_MS = 4000;
 
 const LangContext = createContext({ lang: "en", t: STRINGS.en });
 const useLang = () => useContext(LangContext);
@@ -42,8 +41,6 @@ function countryName(code, lang) {
 }
 
 const fmt = (n, lang) => n.toLocaleString(lang === "it" ? "it-CH" : "en-GB");
-// Texts may be a plain string (typed by the user) or { en, it } (sample content).
-const localized = (text, lang) => (typeof text === "string" ? text : text?.[lang] ?? text?.en ?? "");
 
 /* ---------- app ---------- */
 
@@ -55,10 +52,7 @@ export default function App() {
 
   const [accepted, setAccepted] = usePersistentState("accepted", false);
   const [profile, setProfile] = usePersistentState("profile", null);
-  const [chats, setChats] = usePersistentState("chats", [SAMPLE_INCOMING]);
   const [tab, setTab] = useState("read");
-  const [openChat, setOpenChat] = useState(null);
-  const [composeFor, setComposeFor] = useState(null);
   const [banned, setBanned] = useState(false);
   const [toast, setToast] = useState("");
 
@@ -69,65 +63,22 @@ export default function App() {
     return () => clearTimeout(id);
   }, [toast]);
 
-  const requests = chats.filter((c) => c.role === "author" && c.status === "pending").length;
-
-  const updateChat = (id, fn) => setChats((all) => all.map((c) => (c.id === id ? fn(c) : c)));
-
-  // Start a conversation with the author of a secret. The demo answers after a few seconds.
-  const startChat = (secret, text) => {
-    const id = "c-" + secret.id;
-    setChats((all) => [
-      { id, role: "sender", status: "pending", secretId: secret.id, messages: [{ from: "me", text }] },
-      ...all.filter((c) => c.id !== id),
-    ]);
-    setComposeFor(null);
-    setToast(t.dmSentToast);
-    setTimeout(() => {
-      updateChat(id, (c) => c.status !== "pending" ? c : {
-        ...c, status: "active",
-        messages: [...c.messages, { from: "them", text: { en: STRINGS.en.demoReply, it: STRINGS.it.demoReply } }],
-      });
-    }, DEMO_REPLY_MS);
-  };
-
-  const goToChat = (secretId) => {
-    setOpenChat("c-" + secretId);
-    setTab("messages");
-  };
-
   return (
     <LangContext.Provider value={{ lang, t }}>
       <div className="app">
         <header className="topbar">
           <div className="brand">Hush<small>{t.tagline}</small></div>
           <nav aria-label="Sections">
-            {["read", "write", "messages", "me"].map((k) => (
-              <button key={k} aria-current={tab === k} onClick={() => { setTab(k); if (k !== "messages") setOpenChat(null); }}>
-                {t.tabs[k]}
-                {k === "messages" && requests > 0 && <span className="badge" aria-label={t.requestBadge}>{requests}</span>}
-              </button>
+            {["read", "write", "me"].map((k) => (
+              <button key={k} aria-current={tab === k} onClick={() => setTab(k)}>{t.tabs[k]}</button>
             ))}
           </nav>
         </header>
 
         {tab === "read" && (
-          <Reader
-            chats={chats}
-            onReport={() => setToast(t.reported)}
-            onWrite={() => setTab("write")}
-            onDm={(s) => (chats.some((c) => c.id === "c-" + s.id) ? goToChat(s.id) : setComposeFor(s))}
-          />
+          <Reader onReport={() => setToast(t.reported)} onWrite={() => setTab("write")} />
         )}
         {tab === "write" && <Write profile={profile} onEditProfile={() => setTab("me")} />}
-        {tab === "messages" && (
-          <Messages
-            chats={chats}
-            openId={openChat}
-            onOpen={setOpenChat}
-            onUpdate={updateChat}
-            onToast={setToast}
-          />
-        )}
         {tab === "me" && (
           <Me
             profile={profile}
@@ -140,9 +91,6 @@ export default function App() {
           />
         )}
 
-        {composeFor && profile && (
-          <ComposeSheet secret={composeFor} profile={profile} onClose={() => setComposeFor(null)} onSend={(text) => startChat(composeFor, text)} />
-        )}
         {!accepted && <Welcome onEnter={() => setAccepted(true)} />}
         {accepted && !profile && (
           <div className="overlay" role="dialog" aria-modal="true" aria-labelledby="setup-title">
@@ -167,16 +115,8 @@ function profileLine(p, t, lang) {
   return [t.gender[p.gender], p.age, countryName(p.country, lang)].join(" · ");
 }
 
-function ProfileChip({ p, anonymousAuthor }) {
+function ProfileChip({ p }) {
   const { lang, t } = useLang();
-  if (anonymousAuthor) {
-    return (
-      <div className="chip">
-        <span className="avatar anon" aria-hidden="true">🤫</span>
-        <span><b>{t.authorAnon}</b><small>{t.anonymous}</small></span>
-      </div>
-    );
-  }
   return (
     <div className="chip">
       <span className="avatar" aria-hidden="true">{p.avatar}</span>
@@ -243,7 +183,7 @@ function ProfileForm({ initial, onSave, onCancel, submitLabel }) {
 
 /* ---------- read: one secret per screen, swipe up for the next ---------- */
 
-function Reader({ chats, onReport, onWrite, onDm }) {
+function Reader({ onReport, onWrite }) {
   const { lang, t } = useLang();
   const [category, setCategory] = useState("all");
   const [mine, setMine] = usePersistentState("reactions", {});
@@ -299,12 +239,10 @@ function Reader({ chats, onReport, onWrite, onDm }) {
               <SecretCard
                 secret={slide.secret}
                 selected={mine[slide.secret.id] || {}}
-                hasChat={chats.some((c) => c.id === "c-" + slide.secret.id)}
                 onReact={(k) => toggle(slide.secret.id, k)}
                 onCategory={pick}
                 onReport={onReport}
                 onNext={next}
-                onDm={() => onDm(slide.secret)}
                 first={i === 0}
               />
             )}
@@ -326,7 +264,7 @@ function Reader({ chats, onReport, onWrite, onDm }) {
   );
 }
 
-function SecretCard({ secret, selected, hasChat, onReact, onCategory, onReport, onNext, onDm, first }) {
+function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, first }) {
   const { lang, t } = useLang();
   const reacted = Object.keys(selected).length > 0;
   const count = (k) => secret.r[k] + (selected[k] ? 1 : 0);
@@ -358,11 +296,6 @@ function SecretCard({ secret, selected, hasChat, onReact, onCategory, onReport, 
             </button>
           ))}
         </div>
-        {secret.dm && (
-          <button className="dm" onClick={onDm}>
-            <span aria-hidden="true">✉</span>{hasChat ? t.openChat : t.writeToAuthor}
-          </button>
-        )}
         <div className="foot">
           <button className={"nexthint" + (first ? " pulse" : "")} onClick={onNext}>
             <span aria-hidden="true" className="chev">⌃</span>{first ? t.swipeHint : t.next}
@@ -382,143 +315,6 @@ function AdSlide({ onNext }) {
       <p>{t.adText}</p>
       <button className="nexthint" onClick={onNext}><span aria-hidden="true" className="chev">⌃</span>{t.next}</button>
     </div>
-  );
-}
-
-/* ---------- messages ---------- */
-
-function messageBlocked(r) {
-  return r.contact || r.insult || r.threat;
-}
-
-function ComposeSheet({ secret, profile, onClose, onSend }) {
-  const { lang, t } = useLang();
-  const [text, setText] = useState("");
-  const r = useMemo(() => analyze(text), [text]);
-  const bad = text.trim() && messageBlocked(r);
-  const ok = text.trim().length >= 2 && !bad;
-
-  return (
-    <div className="sheet-backdrop" role="dialog" aria-modal="true" aria-labelledby="dm-title" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="sheet">
-        <div className="sheet-head">
-          <h2 id="dm-title">{t.dmTitle}</h2>
-          <button className="link" onClick={onClose}>{t.cancel}</button>
-        </div>
-        <blockquote className="quote">{secret[lang] || secret.en}</blockquote>
-        <h3>{t.dmWhatTheySee}</h3>
-        <ProfileChip p={profile} />
-        <p className="intro-line">{t.dmAnon}</p>
-        <label htmlFor="dm-text" className="sr-only">{t.typeMessage}</label>
-        <textarea id="dm-text" className="short" maxLength={500} value={text} placeholder={t.dmPlaceholder}
-          onChange={(e) => setText(e.target.value)} />
-        {bad && <p className="intro-line error">{t.dmBlocked}</p>}
-        {r.selfHarm && <HelpBox />}
-        <button className="primary" disabled={!ok} onClick={() => onSend(text.trim())}>{t.dmSend}</button>
-      </div>
-    </div>
-  );
-}
-
-function Messages({ chats, openId, onOpen, onUpdate, onToast }) {
-  const { lang, t } = useLang();
-  const chat = chats.find((c) => c.id === openId);
-  if (chat) return <Thread chat={chat} onBack={() => onOpen(null)} onUpdate={onUpdate} onToast={onToast} />;
-
-  return (
-    <main className="scroll">
-      <h2>{t.messagesTitle}</h2>
-      {chats.length === 0 && <p className="intro-line">{t.messagesEmpty}</p>}
-      <div className="chatlist">
-        {chats.map((c) => {
-          const secret = c.role === "sender" ? SECRETS.find((s) => s.id === c.secretId) : null;
-          const last = c.messages[c.messages.length - 1];
-          const status =
-            c.status === "blocked" ? t.blockedLabel :
-            c.status === "declined" ? t.declinedLabel :
-            c.status === "pending" ? (c.role === "author" ? t.requestBadge : t.waiting) : null;
-          return (
-            <button key={c.id} className="chatrow" onClick={() => onOpen(c.id)}>
-              <ProfileChip p={c.other} anonymousAuthor={c.role === "sender"} />
-              <span className="chatrow-sub">
-                {c.role === "author" ? t.aboutYourSecret : t.aboutTheirSecret}: “{(c.role === "author" ? localized(c.secret, lang) : (secret?.[lang] || secret?.en || "")).slice(0, 60)}…”
-              </span>
-              <span className="chatrow-last">{last ? localized(last.text, lang) : ""}</span>
-              {status && <span className={"pill" + (c.role === "author" && c.status === "pending" ? " hot" : "")}>{status}</span>}
-            </button>
-          );
-        })}
-      </div>
-    </main>
-  );
-}
-
-function Thread({ chat, onBack, onUpdate, onToast }) {
-  const { lang, t } = useLang();
-  const [text, setText] = useState("");
-  const end = useRef(null);
-  const r = useMemo(() => analyze(text), [text]);
-  const bad = text.trim() && messageBlocked(r);
-  const secret = chat.role === "sender" ? SECRETS.find((s) => s.id === chat.secretId) : null;
-  const secretText = chat.role === "author" ? localized(chat.secret, lang) : (secret?.[lang] || secret?.en || "");
-
-  useEffect(() => { end.current?.scrollIntoView?.({ block: "end" }); }, [chat.messages.length]);
-
-  const send = () => {
-    onUpdate(chat.id, (c) => ({ ...c, messages: [...c.messages, { from: "me", text: text.trim() }] }));
-    setText("");
-  };
-  const block = () => { onUpdate(chat.id, (c) => ({ ...c, status: "blocked" })); onToast(t.reported); };
-
-  const canWrite = chat.status === "active";
-
-  return (
-    <main className="thread">
-      <div className="thread-head">
-        <button className="link" onClick={onBack}>‹ {t.back}</button>
-        <ProfileChip p={chat.other} anonymousAuthor={chat.role === "sender"} />
-        {chat.status === "active" && <button className="link" onClick={block}>{t.blockReport}</button>}
-      </div>
-
-      <div className="thread-body">
-        <blockquote className="quote">
-          <small>{chat.role === "author" ? t.aboutYourSecret : t.aboutTheirSecret}</small>
-          {secretText}
-        </blockquote>
-        {chat.messages.map((m, i) => (
-          <div key={i} className={"bubble " + (m.from === "me" ? "me" : "them")}>{localized(m.text, lang)}</div>
-        ))}
-        <div ref={end} />
-      </div>
-
-      <div className="thread-foot">
-        {chat.role === "author" && chat.status === "pending" && (
-          <div className="request">
-            <p><b>{chat.other.nickname}</b> {t.requestText}</p>
-            <div className="row-actions wrap">
-              <button className="primary" onClick={() => onUpdate(chat.id, (c) => ({ ...c, status: "active" }))}>{t.accept}</button>
-              <button className="ghost" onClick={() => onUpdate(chat.id, (c) => ({ ...c, status: "declined" }))}>{t.decline}</button>
-              <button className="ghost danger" onClick={block}>{t.blockReport}</button>
-            </div>
-          </div>
-        )}
-        {chat.role === "sender" && chat.status === "pending" && <p className="intro-line">{t.waitText}</p>}
-        {chat.status === "declined" && <p className="intro-line">{t.declinedText}</p>}
-        {chat.status === "blocked" && <p className="intro-line">{t.blockedText}</p>}
-        {canWrite && (
-          <>
-            {bad && <p className="intro-line error">{t.dmBlocked}</p>}
-            {r.selfHarm && <HelpBox />}
-            <div className="composer">
-              <label htmlFor="msg" className="sr-only">{t.typeMessage}</label>
-              <textarea id="msg" rows={1} maxLength={500} value={text} placeholder={t.typeMessage}
-                onChange={(e) => setText(e.target.value)} />
-              <button className="primary" disabled={!text.trim() || !!bad} onClick={send}>{t.sendMsg}</button>
-            </div>
-          </>
-        )}
-      </div>
-    </main>
   );
 }
 

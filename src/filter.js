@@ -74,6 +74,8 @@ const THREATS = /\b(i('| a)?ll kill (you|him|her|them)|i will kill|i'?m going to
 const EMAIL = /[\w.+-]+@[\w-]+\.[\w.]+/;
 const HANDLE = /(^|\s)@\w{2,}/;
 const PHONE = /\+?\d[\d\s/.-]{7,}\d/;
+// Invitations to get in touch outside the app.
+const CONTACT_INVITE = /\b(dm me|message me|text me|write to me|contact me|add me|find me on|hit me up|my (insta|ig|snap|snapchat|telegram|whatsapp|tiktok|number)|scrivimi|contattami|aggiungimi|cercami|trovami su|mandami un messaggio|il mio (numero|insta|profilo)|su (insta|instagram|snap|telegram|whatsapp|tiktok) sono)\b/i;
 const LINK = /(https?:\/\/|www\.|\b\w+\.(com|net|org|io|ch|it|co|uk|de|fr)\b)/i;
 
 const normalizedText = (text, rep) =>
@@ -130,7 +132,7 @@ export function analyze(text) {
   }
 
   const texts = [text, normalizedText(text, "l"), normalizedText(text, "i")];
-  r.contact = EMAIL.test(text) || HANDLE.test(text) || PHONE.test(text) || LINK.test(text);
+  r.contact = EMAIL.test(text) || HANDLE.test(text) || PHONE.test(text) || LINK.test(text) || texts.some((t) => CONTACT_INVITE.test(t));
   r.insult = texts.some((t) => INSULTS.test(t));
   r.threat = texts.some((t) => THREATS.test(t));
   r.selfHarm = texts.some((t) => SELF_HARM.test(t));

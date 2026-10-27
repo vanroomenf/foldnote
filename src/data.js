@@ -99,32 +99,10 @@ export const SECRETS = [
     it: "Rispondo «sto arrivando» quando non sono ancora uscito dalla doccia." },
 ];
 
-// Prototype extras: which authors accept messages, non-binary authors,
-// and starting counts for the newer reactions.
-const OPEN_TO_MESSAGES = new Set([16, 5, 8, 10, 22, 14, 21, 3, 9]);
+// Prototype extras: non-binary authors and starting counts for the newer reactions.
 const NON_BINARY = new Set([9, 22]);
 for (const s of SECRETS) {
-  s.dm = OPEN_TO_MESSAGES.has(s.id);
   if (NON_BINARY.has(s.id)) s.gender = "nb";
   s.r.strong ??= Math.round(s.r.hug * 0.35 + s.views * 0.01);
   s.r.safe ??= Math.round(s.views * 0.04 + s.r.wow * 0.3);
 }
-
-// One example of someone writing to you about your own secret, so the
-// recipient's side of messaging can be tried in the prototype.
-export const SAMPLE_INCOMING = {
-  id: "c-sample",
-  role: "author",
-  status: "pending",
-  secret: {
-    en: "When it rains I feel calmer than on sunny days, and I've never told anyone.",
-    it: "Quando piove mi sento più tranquillo che nelle giornate di sole, e non l'ho mai detto a nessuno.",
-  },
-  other: { nickname: "nightowl_92", avatar: "🦉", gender: "f", age: "30–39", country: "IT" },
-  messages: [
-    { from: "them", text: {
-      en: "Hi, I read your secret about the rain. It's exactly the same for me. Would you like to talk about it?",
-      it: "Ciao, ho letto il tuo segreto sulla pioggia. Per me è esattamente uguale. Ti va di parlarne?",
-    } },
-  ],
-};
