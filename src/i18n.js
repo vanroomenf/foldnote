@@ -300,3 +300,72 @@ Object.assign(STRINGS.it, {
     ["Solo maggiorenni.", "Bisogna avere almeno 18 anni."],
   ],
 });
+
+/* ---------- reporting ---------- */
+
+STRINGS.en.rep = {
+  title: "Why are you reporting this?",
+  intro: "Reports are anonymous. The author won't know who reported their secret.",
+  reasons: {
+    identifies: ["It identifies someone", "A name, nickname or details that make it clear who it's about"],
+    contact: ["It tries to make contact", "Phone number, social handle, link, or an invitation to get in touch"],
+    hate: ["Bullying, hate or threats", "Insults, hatred toward a group, or a threat against someone"],
+    sexual: ["Sexual or explicit content", "Graphic sexual details or anything involving minors"],
+    risk: ["Someone may be in danger", "Self-harm, suicide, abuse or violence happening now"],
+    minor: ["The author seems to be under 18", "Foldnote is only for adults"],
+    illegal: ["Something illegal", "Selling drugs or weapons, fraud, or other crimes"],
+    spam: ["Spam or advertising", "Promotion, scams or repeated posts"],
+    other: ["Something else", "It breaks the rules in another way"],
+  },
+  next: "Continue",
+  change: "Change",
+  detailsTitle: "Anything to add?",
+  detailsLabel: "Details (optional)",
+  detailsPlaceholder: "What should the moderator look at? Don't include names or contact details.",
+  detailsBad: "Please remove contact details, insults or threats from your note.",
+  identifiesNote: "If the secret is about you and you want it removed quickly, say so here. You don't need to tell us who you are.",
+  riskTitle: "If someone is in immediate danger, call the emergency number (112 in Europe, 911 in the US).",
+  riskBody: "We review these reports first. If it's you who's struggling, you can talk to someone right now:",
+  whatHappens: "The secret is hidden for you straight away. A moderator reviews it, usually within 24 hours, and removes it if it breaks the rules. Repeated false reports can lead to a ban.",
+  submit: "Send report",
+  sentToast: "Report sent. Thank you for keeping Foldnote safe.",
+  doneTitle: "You reported this secret",
+  doneText: "It's hidden for you, and a moderator will review it.",
+  reasonWas: "Reason:",
+  undo: "Undo report and show it again",
+};
+
+STRINGS.it.rep = {
+  title: "Perché lo segnali?",
+  intro: "Le segnalazioni sono anonime. L'autore non saprà chi ha segnalato il suo segreto.",
+  reasons: {
+    identifies: ["Fa riconoscere qualcuno", "Un nome, un soprannome o dettagli che fanno capire di chi si parla"],
+    contact: ["Cerca un contatto", "Numero di telefono, profilo social, link o un invito a farsi contattare"],
+    hate: ["Bullismo, odio o minacce", "Insulti, odio verso un gruppo o una minaccia verso qualcuno"],
+    sexual: ["Contenuti sessuali espliciti", "Dettagli sessuali espliciti o qualsiasi cosa che riguardi minori"],
+    risk: ["Qualcuno potrebbe essere in pericolo", "Autolesionismo, suicidio, abusi o violenze in corso"],
+    minor: ["L'autore sembra minorenne", "Foldnote è solo per maggiorenni"],
+    illegal: ["Qualcosa di illegale", "Vendita di droghe o armi, truffe o altri reati"],
+    spam: ["Spam o pubblicità", "Promozioni, truffe o messaggi ripetuti"],
+    other: ["Altro", "Viola le regole in un altro modo"],
+  },
+  next: "Continua",
+  change: "Cambia",
+  detailsTitle: "Vuoi aggiungere qualcosa?",
+  detailsLabel: "Dettagli (facoltativo)",
+  detailsPlaceholder: "Cosa deve guardare il moderatore? Non scrivere nomi o contatti.",
+  detailsBad: "Togli dalla nota contatti, insulti o minacce.",
+  identifiesNote: "Se il segreto parla di te e vuoi che venga tolto in fretta, scrivilo qui. Non serve dirci chi sei.",
+  riskTitle: "Se qualcuno è in pericolo immediato, chiama il numero di emergenza (112 in Europa).",
+  riskBody: "Queste segnalazioni le controlliamo per prime. Se sei tu a stare male, puoi parlare con qualcuno anche adesso:",
+  whatHappens: "Il segreto sparisce subito per te. Un moderatore lo controlla, di solito entro 24 ore, e lo rimuove se viola le regole. Le segnalazioni false ripetute possono portare all'espulsione.",
+  submit: "Invia segnalazione",
+  sentToast: "Segnalazione inviata. Grazie per aiutare a tenere Foldnote sicuro.",
+  doneTitle: "Hai segnalato questo segreto",
+  doneText: "Non lo vedi più, e un moderatore lo controllerà.",
+  reasonWas: "Motivo:",
+  undo: "Annulla la segnalazione e mostralo di nuovo",
+};
+
+STRINGS.en.allReactions = "Reactions";
+STRINGS.it.allReactions = "Reazioni";

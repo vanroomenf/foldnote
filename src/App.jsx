@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
-  CATEGORIES, REACTIONS, QUICK_REACTIONS, SECRETS, GENDERS, AGE_BANDS, COUNTRIES, AVATARS,
+  CATEGORIES, REACTIONS, SECRETS, GENDERS, AGE_BANDS, COUNTRIES, AVATARS,
 } from "./data.js";
 import { analyze, isBlocked } from "./filter.js";
 import { STRINGS, SUPPORTED, LANGUAGE_NAMES, deviceLanguage } from "./i18n.js";
@@ -41,6 +41,10 @@ function countryName(code, lang) {
 }
 
 const fmt = (n, lang) => n.toLocaleString(lang === "it" ? "it-CH" : "en-GB");
+const compact = (n, lang) => {
+  try { return new Intl.NumberFormat(lang, { notation: "compact", maximumFractionDigits: 1 }).format(n); }
+  catch { return String(n); }
+};
 
 /* ---------- logo: a little folded card with a heart, like a note passed in class ---------- */
 
@@ -92,7 +96,7 @@ export default function App() {
         </header>
 
         {tab === "read" && (
-          <Reader onReport={() => setToast(t.reported)} onWrite={() => setTab("write")} />
+          <Reader onToast={setToast} onWrite={() => setTab("write")} />
         )}
         {tab === "write" && <Write profile={profile} onEditProfile={() => setTab("me")} />}
         {tab === "me" && (
@@ -199,10 +203,12 @@ function ProfileForm({ initial, onSave, onCancel, submitLabel }) {
 
 /* ---------- read: one secret per screen, swipe up for the next ---------- */
 
-function Reader({ onReport, onWrite }) {
+function Reader({ onToast, onWrite }) {
   const { lang, t } = useLang();
   const [category, setCategory] = useState("all");
   const [mine, setMine] = usePersistentState("reactions", {});
+  const [reports, setReports] = usePersistentState("reports", {}); // secret id -> { reason, details, at }
+  const [reporting, setReporting] = useState(null);
   const deck = useRef(null);
 
   const list = useMemo(
@@ -251,13 +257,20 @@ function Reader({ onReport, onWrite }) {
       <div className="deck" ref={deck} tabIndex={0} aria-label={t.swipeHint}>
         {slides.map((slide, i) => (
           <section className="slide" key={slide.secret?.id ?? slide.id ?? "end"}>
-            {slide.type === "secret" && (
+            {slide.type === "secret" && reports[slide.secret.id] && (
+              <ReportedCard
+                reason={reports[slide.secret.id].reason}
+                onUndo={() => setReports((r) => { const c = { ...r }; delete c[slide.secret.id]; return c; })}
+                onNext={next}
+              />
+            )}
+            {slide.type === "secret" && !reports[slide.secret.id] && (
               <SecretCard
                 secret={slide.secret}
                 selected={mine[slide.secret.id] || {}}
                 onReact={(k) => toggle(slide.secret.id, k)}
                 onCategory={pick}
-                onReport={onReport}
+                onReport={() => setReporting(slide.secret)}
                 onNext={next}
                 first={i === 0}
               />
@@ -276,6 +289,18 @@ function Reader({ onReport, onWrite }) {
           </section>
         ))}
       </div>
+
+      {reporting && (
+        <ReportSheet
+          secret={reporting}
+          onClose={() => setReporting(null)}
+          onSubmit={(report) => {
+            setReports((r) => ({ ...r, [reporting.id]: { ...report, at: Date.now() } }));
+            setReporting(null);
+            onToast(t.rep.sentToast);
+          }}
+        />
+      )}
     </main>
   );
 }
@@ -283,27 +308,22 @@ function Reader({ onReport, onWrite }) {
 function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, first }) {
   const { lang, t } = useLang();
   const count = (k) => secret.r[k] + (selected[k] ? 1 : 0);
-  const [open, setOpen] = useState(false);
+  const [label, setLabel] = useState(null);
 
-  // The card shows this secret's most-used reactions (order fixed from the
-  // starting counts, so buttons don't jump while you tap), plus any you picked.
+  // Every reaction is visible as a compact emoji chip. Order is fixed per secret
+  // (most used first, from the starting counts) so chips don't jump while you tap.
   const ranked = useMemo(
     () => [...REACTIONS].sort((a, b) => (secret.r[b.key] ?? 0) - (secret.r[a.key] ?? 0)),
     [secret]
   );
-  const quick = ranked.slice(0, QUICK_REACTIONS);
-  const extraPicked = ranked.slice(QUICK_REACTIONS).filter((r) => selected[r.key]);
-  const shown = open ? ranked : quick;
-  const reactButton = (r) => (
-    <button key={r.key} className="react" aria-pressed={!!selected[r.key]} onClick={() => onReact(r.key)}>
-      <span className="e" aria-hidden="true">{r.emoji}</span>
-      <span className="l">{t.reactions[r.key]}</span>
-      <span className="n">{fmt(count(r.key), lang)}</span>
-    </button>
-  );
+  useEffect(() => {
+    if (!label) return;
+    const id = setTimeout(() => setLabel(null), 1400);
+    return () => clearTimeout(id);
+  }, [label]);
 
   return (
-    <article className={"note" + (open ? " open" : "")}>
+    <article className="note">
       <div className="meta">
         <button className="cattag" onClick={() => onCategory(secret.cat)}>{catText(secret.cat, lang)[0]}</button>
         <span className={"gender g-" + secret.gender}>{t.gender[secret.gender]}</span>
@@ -314,13 +334,23 @@ function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, f
       <p className="text">{secret[lang] || secret.en}</p>
 
       <div className="note-bottom">
-        <div className={"reacts" + (open ? " all" : "")} aria-label={open ? t.allReactions : undefined}>
-          {shown.map(reactButton)}
-          <button className="react more" aria-expanded={open} aria-pressed={!open && extraPicked.length > 0} onClick={() => setOpen((o) => !o)}>
-            <span className="e" aria-hidden="true">{open ? "−" : extraPicked.length ? extraPicked.map((r) => r.emoji).slice(0, 2).join("") : "+"}</span>
-            <span className="l">{open ? t.lessReactions : t.moreReactions}</span>
-            <span className="n">{open ? "" : REACTIONS.length - shown.length}</span>
-          </button>
+        <div className="reacts-wrap">
+          {label && <div className="react-label" role="status">{label}</div>}
+          <div className="reacts" role="group" aria-label={t.allReactions}>
+            {ranked.map((r) => (
+              <button
+                key={r.key}
+                className="react"
+                aria-pressed={!!selected[r.key]}
+                aria-label={`${t.reactions[r.key]}: ${fmt(count(r.key), lang)}`}
+                title={t.reactions[r.key]}
+                onClick={() => { onReact(r.key); setLabel(`${r.emoji} ${t.reactions[r.key]}`); }}
+              >
+                <span className="e" aria-hidden="true">{r.emoji}</span>
+                <span className="n" aria-hidden="true">{compact(count(r.key), lang)}</span>
+              </button>
+            ))}
+          </div>
         </div>
         <div className="foot">
           <button className={"nexthint" + (first ? " pulse" : "")} onClick={onNext}>
@@ -330,6 +360,84 @@ function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, f
         </div>
       </div>
     </article>
+  );
+}
+
+/* ---------- report ---------- */
+
+const REPORT_REASONS = ["identifies", "contact", "hate", "sexual", "risk", "minor", "illegal", "spam", "other"];
+
+function ReportSheet({ secret, onClose, onSubmit }) {
+  const { lang, t } = useLang();
+  const [step, setStep] = useState("reason");
+  const [reason, setReason] = useState("");
+  const [details, setDetails] = useState("");
+
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const r = useMemo(() => analyze(details), [details]);
+  const detailsBad = details.trim() && (r.contact || r.insult || r.threat);
+
+  return (
+    <div className="sheet-backdrop" role="dialog" aria-modal="true" aria-labelledby="report-title"
+      onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="sheet">
+        <div className="sheet-head">
+          <h2 id="report-title">{step === "reason" ? t.rep.title : t.rep.detailsTitle}</h2>
+          <button className="link" onClick={onClose}>{t.cancel}</button>
+        </div>
+        <blockquote className="quote">{secret[lang] || secret.en}</blockquote>
+
+        {step === "reason" && (
+          <>
+            <p className="intro-line">{t.rep.intro}</p>
+            <div className="reasons" role="radiogroup" aria-label={t.rep.title}>
+              {REPORT_REASONS.map((k) => (
+                <label key={k} className={"reason" + (reason === k ? " on" : "")} htmlFor={"reason-" + k}>
+                  <input id={"reason-" + k} type="radio" name="reason" checked={reason === k} onChange={() => setReason(k)} />
+                  <span><b>{t.rep.reasons[k][0]}</b><small>{t.rep.reasons[k][1]}</small></span>
+                </label>
+              ))}
+            </div>
+            <button className="primary" disabled={!reason} onClick={() => setStep("details")}>{t.rep.next}</button>
+          </>
+        )}
+
+        {step === "details" && (
+          <>
+            <p className="intro-line"><b className="ink">{t.rep.reasons[reason][0]}</b> · <button className="link inline" onClick={() => setStep("reason")}>{t.rep.change}</button></p>
+            {reason === "risk" && <HelpBox forOthers />}
+            {reason === "identifies" && <p className="note-small">{t.rep.identifiesNote}</p>}
+            <label htmlFor="report-details" className="field-label">{t.rep.detailsLabel}</label>
+            <textarea id="report-details" className="short" maxLength={300} value={details}
+              placeholder={t.rep.detailsPlaceholder} onChange={(e) => setDetails(e.target.value)} />
+            {detailsBad && <p className="intro-line error">{t.rep.detailsBad}</p>}
+            <p className="note-small">{t.rep.whatHappens}</p>
+            <button className="primary" disabled={!!detailsBad} onClick={() => onSubmit({ reason, details: details.trim() })}>{t.rep.submit}</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ReportedCard({ reason, onUndo, onNext }) {
+  const { t } = useLang();
+  return (
+    <div className="reported">
+      <span className="reported-icon" aria-hidden="true">⚑</span>
+      <h2>{t.rep.doneTitle}</h2>
+      <p>{t.rep.doneText}</p>
+      <p className="muted">{t.rep.reasonWas} <b>{t.rep.reasons[reason]?.[0]}</b></p>
+      <div className="end-actions">
+        <button className="primary" onClick={onNext}>{t.next}</button>
+        <button className="link" onClick={onUndo}>{t.rep.undo}</button>
+      </div>
+    </div>
   );
 }
 
@@ -448,13 +556,15 @@ function Check({ state, children }) {
   );
 }
 
-function HelpBox() {
+function HelpBox({ forOthers }) {
   const { t } = useLang();
   return (
     <div className="help" role="alert">
-      <p><strong>{t.help.title}</strong> {t.help.body}</p>
+      {forOthers
+        ? <p><strong>{t.rep.riskTitle}</strong> {t.rep.riskBody}</p>
+        : <p><strong>{t.help.title}</strong> {t.help.body}</p>}
       {t.help.lines.map(([who, num]) => <p key={num}>{who} <span className="num">{num}</span></p>)}
-      <p>{t.help.emergency}</p>
+      {!forOthers && <p>{t.help.emergency}</p>}
     </div>
   );
 }

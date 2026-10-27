@@ -29,8 +29,6 @@ export const REACTIONS = [
   { key: "goforit", emoji: "🔥" },
 ];
 
-// How many reactions show on a card before "More".
-export const QUICK_REACTIONS = 4;
 
 export const GENDERS = ["m", "f", "nb", "x"];
 export const AGE_BANDS = ["18–19", "20–29", "30–39", "40–49", "50–59", "60+"];

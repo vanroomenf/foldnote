@@ -72,17 +72,16 @@ nav button[aria-current="true"]{background:var(--accent);color:var(--accent-ink)
 .g-x{background:var(--bg);color:var(--muted)}
 .text{flex:1;min-height:0;overflow-y:auto;display:flex;align-items:center;font-family:var(--display);font-size:clamp(1.3rem,5.2vw,1.75rem);line-height:1.38;margin:0;text-wrap:pretty}
 .note-bottom{flex:none;display:grid;gap:12px}
-.reacts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
-.reacts.all{grid-template-columns:repeat(4,minmax(0,1fr))}
-.note.open .react.more{border-style:dashed;color:var(--muted)}
-.react.more .e{font-size:1.15rem;font-weight:700;color:var(--accent)}
-.react{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:6px 4px;display:grid;justify-items:center;gap:1px;font-size:.7rem;line-height:1.2;min-width:0;transition:background .15s,border-color .15s,transform .1s}
-.react .e{font-size:1.15rem}
-.react .l{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.react .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.72rem}
+.reacts-wrap{position:relative}
+.reacts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.react{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:6px 2px 5px;display:grid;justify-items:center;gap:1px;min-width:0;line-height:1.1;transition:background .15s,border-color .15s,transform .1s}
+.react .e{font-size:1.3rem;line-height:1.15}
+.react .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.68rem}
 .react[aria-pressed="true"]{background:var(--soft);border-color:var(--accent)}
 .react[aria-pressed="true"] .n{color:var(--accent);font-weight:700}
-.react:active{transform:scale(.96)}
+.react:active{transform:scale(.94)}
+.react-label{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:.82rem;font-weight:700;padding:6px 12px;border-radius:999px;white-space:nowrap;pointer-events:none;animation:pop .18s ease-out}
+@keyframes pop{from{opacity:0;transform:translate(-50%,4px)}to{opacity:1;transform:translate(-50%,0)}}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .nexthint{border:0;background:none;color:var(--accent);font-size:.85rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;padding:6px 2px}
 .chev{display:inline-block;font-size:1.1rem;line-height:1;transform:translateY(3px)}
@@ -160,8 +159,8 @@ textarea{width:100%;min-height:140px;resize:vertical;border:1px solid var(--line
 .ban h1{color:var(--bad)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;z-index:30;max-width:calc(100% - 32px)}
 
-@media (max-width:420px){.brand{font-size:1.3rem}.brand small{display:none}nav button{padding:7px 8px;font-size:.8rem}.react{font-size:.64rem}}
-@media (max-height:700px){.text{font-size:1.15rem}.note{gap:10px;padding-top:16px}.react .e{font-size:1rem}}
+@media (max-width:420px){.brand{font-size:1.3rem}.brand small{display:none}nav button{padding:7px 8px;font-size:.8rem}.react .e{font-size:1.15rem}}
+@media (max-height:700px){.text{font-size:1.15rem}.note{gap:10px;padding-top:16px}.react .e{font-size:1.1rem}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}.deck{scroll-behavior:auto}}
 
 /* Profile */
@@ -187,3 +186,22 @@ textarea{width:100%;min-height:140px;resize:vertical;border:1px solid var(--line
 .privacy{margin:0;display:grid;gap:10px}
 .privacy dt{font-weight:700}
 .privacy dd{margin:0;color:var(--muted);font-size:.92rem}
+
+/* Report */
+.sheet-backdrop{position:fixed;inset:0;z-index:25;background:rgba(10,16,22,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:520px;max-height:92%;overflow-y:auto;background:var(--paper);border-radius:20px 20px 0 0;display:grid;gap:12px;
+  padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));animation:rise .2s ease-out}
+@keyframes rise{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.quote{margin:0;padding:10px 14px;border-left:3px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-family:var(--display);font-size:.98rem;line-height:1.45;max-height:7.5em;overflow:hidden}
+textarea.short{min-height:90px;font-family:var(--body);font-size:1rem}
+.reasons{display:grid;gap:6px}
+.reason{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.reason input{flex:none;width:18px;height:18px;margin-top:2px;accent-color:var(--accent)}
+.reason span{display:grid;min-width:0}
+.reason small{color:var(--muted);font-size:.84rem}
+.reason.on{border-color:var(--accent);background:var(--soft)}
+.reported{flex:1;border:1px solid var(--line);background:var(--paper);border-radius:var(--r);padding:28px 22px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.reported h2{font-size:1.5rem}
+.reported p{margin:0;color:var(--muted)}
+.reported-icon{font-size:1.8rem;color:var(--warm)}
