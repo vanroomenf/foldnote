@@ -34,7 +34,7 @@ By design, Foldnote has no private messages, comments or followers, so nobody ca
 
 ## Languages
 
-The interface follows the phone's language (`navigator.languages`), falling back to English. Secrets are never translated. When someone writes a secret, its language is recognised automatically (`src/language.js`) and shown to the author, who can correct it. Under Me, readers choose which languages they want to read, or all languages; it starts with the phone's language.
+The interface follows the phone's language (`navigator.languages`), falling back to English. Secrets are never translated. When someone writes a secret, its language is recognised automatically (`src/language.js`): the author sees the three most likely languages, with the best guess selected, and an "Another language" menu for anything else. This stays short however many languages the app supports. Under Me, readers choose which languages they want to read, or all languages; it starts with the phone's language.
 
 ## Before going live
 

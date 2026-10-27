@@ -532,7 +532,7 @@ function Write({ profile, onEditProfile, onSeeMine, onPublish }) {
   const [category, setCategory] = useState("");
   const [duration, setDuration] = useState("30d");
   const [pickedLang, setPickedLang] = useState(null); // author's correction, if any
-  const detected = useMemo(() => detectLanguage(text), [text]);
+  const detected = useMemo(() => detectLanguage(text, lang), [text, lang]);
   const writtenIn = pickedLang || detected.lang;
   const [justSent, setJustSent] = useState(false);
 
@@ -578,9 +578,18 @@ function Write({ profile, onEditProfile, onSeeMine, onPublish }) {
                 : t.wlang.unknown}
             </p>
             <div className="pick small" role="group" aria-label={t.wlang.label}>
-              {LANGUAGES.map((l) => (
+              {[...new Set([...(pickedLang && !detected.candidates.includes(pickedLang) ? [pickedLang] : []), ...detected.candidates])].slice(0, 3).map((l) => (
                 <button key={l} aria-pressed={writtenIn === l} onClick={() => setPickedLang(l)}>{cap(languageName(l, lang))}</button>
               ))}
+              <label className="other-lang" htmlFor="other-lang">
+                <span>{t.wlang.other}</span>
+                <select id="other-lang" value="" onChange={(e) => e.target.value && setPickedLang(e.target.value)}>
+                  <option value="">…</option>
+                  {LANGUAGES.map((l) => ({ l, n: cap(languageName(l, lang)) }))
+                    .sort((a, b) => a.n.localeCompare(b.n, lang))
+                    .map(({ l, n }) => <option key={l} value={l}>{n}</option>)}
+                </select>
+              </label>
             </div>
           </div>
         )}
@@ -672,11 +681,6 @@ function LanguagePicker({ value, onChange, focus, onFocused }) {
     onFocused();
   }, [focus, onFocused]);
 
-  const counts = useMemo(() => {
-    const c = {};
-    SECRETS.forEach((s) => { c[s.orig] = (c[s.orig] || 0) + 1; });
-    return c;
-  }, []);
   // Phone language first, then the others alphabetically.
   const langs = useMemo(
     () => [lang, ...LANGUAGES.filter((l) => l !== lang).sort((a, b) => languageName(a, lang).localeCompare(languageName(b, lang), lang))],
@@ -696,7 +700,7 @@ function LanguagePicker({ value, onChange, focus, onFocused }) {
 
       <label className={"agree world" + (all ? " on" : "")} htmlFor="lang-all">
         <input id="lang-all" type="checkbox" checked={all} onChange={() => onChange(all ? [lang] : ["all"])} />
-        <span>🌍 <b>{t.where.all}</b> <small className="muted">· {t.secretsCount(SECRETS.length)}</small></span>
+        <span>🌍 <b>{t.where.all}</b></span>
       </label>
 
       <div className="countries">
@@ -704,7 +708,6 @@ function LanguagePicker({ value, onChange, focus, onFocused }) {
           <label key={l} className={"country" + (chosen.includes(l) ? " on" : "")} htmlFor={"rl-" + l}>
             <input id={"rl-" + l} type="checkbox" checked={chosen.includes(l)} onChange={() => toggle(l)} />
             <span className="cname">{cap(languageName(l, lang))}</span>
-            <span className="ccount">{counts[l] || 0}</span>
           </label>
         ))}
       </div>

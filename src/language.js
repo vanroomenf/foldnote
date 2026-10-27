@@ -18,16 +18,20 @@ const SETS = Object.fromEntries(Object.entries(WORDS).map(([k, v]) => [k, new Se
 // Letters that point strongly to one language.
 const LETTERS = { de: /[äöüß]/i, es: /[ñ¿¡]/i, pt: /[ãõ]/i, fr: /[êâîôûëœ]|ç(?!ã)/i, it: /\b(perché|più|così|già)\b/i };
 
-export function detectLanguage(text) {
+export function detectLanguage(text, preferred) {
   const words = text.toLowerCase().match(/[\p{L}']+/gu) || [];
-  if (words.length < 3) return { lang: null, confident: false };
   const score = {};
   for (const l of LANGUAGES) {
     score[l] = words.reduce((n, w) => n + (SETS[l].has(w) || SETS[l].has(w.split("'").pop()) ? 1 : 0), 0);
     if (LETTERS[l]?.test(text)) score[l] += 2;
   }
-  const ranked = LANGUAGES.slice().sort((a, b) => score[b] - score[a]);
+  // Most likely first; on a tie the reader's own language wins.
+  const ranked = LANGUAGES.slice().sort((a, b) => score[b] - score[a] || (b === preferred) - (a === preferred));
   const [best, second] = ranked;
-  if (score[best] < 2) return { lang: null, confident: false };
-  return { lang: best, confident: score[best] - score[second] >= 2 };
+  const sure = words.length >= 3 && score[best] >= 2;
+  return {
+    lang: sure ? best : null,
+    confident: sure && score[best] - score[second] >= 2,
+    candidates: ranked.slice(0, 3), // the three most likely languages, to offer the author
+  };
 }

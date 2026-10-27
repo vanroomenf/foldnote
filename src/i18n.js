@@ -450,8 +450,9 @@ STRINGS.en.wlang = {
   label: "Language",
   writtenIn: "Written in",
   auto: "recognised automatically, tap to correct",
-  unknown: "Which language is this in? Write a little more, or pick it:",
+  unknown: "Which language is this in? Write a little more, or pick it here:",
   missing: "Choose the language to send",
+  other: "Another language",
 };
 STRINGS.it.wlang = {
   label: "Lingua",
@@ -459,4 +460,5 @@ STRINGS.it.wlang = {
   auto: "riconosciuto in automatico, tocca per correggere",
   unknown: "In che lingua è? Scrivi ancora un po', oppure sceglila:",
   missing: "Scegli la lingua per inviare",
+  other: "Altra lingua",
 };
