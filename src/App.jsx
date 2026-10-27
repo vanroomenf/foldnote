@@ -3,6 +3,7 @@ import {
   CATEGORIES, REACTIONS, SECRETS, GENDERS, AGE_BANDS, COUNTRIES, AVATARS,
 } from "./data.js";
 import { analyze, isBlocked } from "./filter.js";
+import { LANGUAGES, detectLanguage } from "./language.js";
 import { STRINGS, deviceLanguage } from "./i18n.js";
 
 /* ---------- helpers ---------- */
@@ -109,10 +110,10 @@ export default function App() {
   const [accepted, setAccepted] = usePersistentState("accepted", false);
   const [profile, setProfile] = usePersistentState("profile", null);
   const [mySecrets, setMySecrets] = usePersistentState("mysecrets", []);
-  // Where secrets are read from: ["world"] or a list of country codes. Starts with the profile country.
-  const [savedPlaces, setPlaces] = usePersistentState("places", null);
-  const places = savedPlaces?.length ? savedPlaces : profile ? [profile.country] : ["world"];
-  const [focusPlaces, setFocusPlaces] = useState(false);
+  // Languages the reader wants to read: ["all"] or a list of language codes. Starts with the phone's language.
+  const [savedLangs, setReadLangs] = usePersistentState("readlangs", null);
+  const readLangs = savedLangs?.length ? savedLangs : [lang];
+  const [focusLangs, setFocusLangs] = useState(false);
   const [tab, setTab] = useState("read");
   const [banned, setBanned] = useState(false);
   const [toast, setToast] = useState("");
@@ -138,9 +139,9 @@ export default function App() {
 
         {tab === "read" && (
           <Reader
-            places={places}
-            onPlaces={setPlaces}
-            onChangePlaces={() => { setFocusPlaces(true); setTab("me"); }}
+            readLangs={readLangs}
+            onReadLangs={setReadLangs}
+            onChangeLangs={() => { setFocusLangs(true); setTab("me"); }}
             onToast={setToast}
             onWrite={() => setTab("write")}
           />
@@ -159,10 +160,10 @@ export default function App() {
             onSave={setProfile}
             mySecrets={mySecrets}
             onDelete={(id) => { setMySecrets((all) => all.filter((x) => x.id !== id)); setToast(t.mine.deletedToast); }}
-            places={places}
-            onPlaces={setPlaces}
-            focusPlaces={focusPlaces}
-            onFocused={() => setFocusPlaces(false)}
+            readLangs={readLangs}
+            onReadLangs={setReadLangs}
+            focusLangs={focusLangs}
+            onFocused={() => setFocusLangs(false)}
             onDemoBan={() => setBanned(true)}
             onReplayWelcome={() => setAccepted(false)}
           />
@@ -260,20 +261,20 @@ function ProfileForm({ initial, onSave, onCancel, submitLabel }) {
 
 /* ---------- read: one secret per screen, swipe up for the next ---------- */
 
-function Reader({ places, onPlaces, onChangePlaces, onToast, onWrite }) {
+function Reader({ readLangs, onReadLangs, onChangeLangs, onToast, onWrite }) {
   const { lang, t } = useLang();
   const [category, setCategory] = useState("all");
-  const world = places.includes("world");
+  const all = readLangs.includes("all");
   const [mine, setMine] = usePersistentState("reactions", {});
   const [reports, setReports] = usePersistentState("reports", {}); // secret id -> { reason, details, at }
   const [reporting, setReporting] = useState(null);
   const deck = useRef(null);
 
   const list = useMemo(
-    () => SECRETS.filter((s) => (category === "all" || s.cat === category) && (world || places.includes(s.country))),
-    [category, places, world]
+    () => SECRETS.filter((s) => (category === "all" || s.cat === category) && (all || readLangs.includes(s.orig))),
+    [category, readLangs, all]
   );
-  useEffect(() => { deck.current?.scrollTo({ top: 0 }); }, [places]);
+  useEffect(() => { deck.current?.scrollTo({ top: 0 }); }, [readLangs]);
 
   const slides = useMemo(() => {
     const out = [];
@@ -304,12 +305,9 @@ function Reader({ places, onPlaces, onChangePlaces, onToast, onWrite }) {
 
   return (
     <main className="reader">
-      <button className="place" onClick={onChangePlaces} aria-label={t.where.title}>
+      <button className="place" onClick={onChangeLangs} aria-label={t.where.title}>
         <span className="place-label">{t.where.label}</span>
-        <span className="place-flags" aria-hidden="true">
-          {world ? "🌍" : places.slice(0, 6).map((c) => flag(c)).join(" ")}{!world && places.length > 6 ? " +" + (places.length - 6) : ""}
-        </span>
-        <span className="place-names">{world ? t.where.world : places.map((c) => countryName(c, lang)).join(", ")}</span>
+        <span className="place-names">{all ? "🌍 " + t.where.all : readLangs.map((l) => cap(languageName(l, lang))).join(", ")}</span>
         <span className="place-edit">{t.where.change}</span>
       </button>
       <div className="cats" role="group" aria-label={t.categories}>
@@ -348,8 +346,8 @@ function Reader({ places, onPlaces, onChangePlaces, onToast, onWrite }) {
               <div className="endcard">
                 <h2>{list.length ? t.endTitle : t.where.emptyTitle}</h2>
                 <p>{list.length ? t.endText : t.where.emptyText}</p>
-                {!world && (
-                  <button className="ghost" onClick={() => onPlaces(["world"])}>🌍 {t.where.seeWorld}</button>
+                {!all && (
+                  <button className="ghost" onClick={() => onReadLangs(["all"])}>🌍 {t.where.seeAll}</button>
                 )}
                 <div className="end-actions">
                   <button className="primary" onClick={onWrite}>{t.writeOne}</button>
@@ -533,22 +531,26 @@ function Write({ profile, onEditProfile, onSeeMine, onPublish }) {
   const [text, setText] = useState("");
   const [category, setCategory] = useState("");
   const [duration, setDuration] = useState("30d");
+  const [pickedLang, setPickedLang] = useState(null); // author's correction, if any
+  const detected = useMemo(() => detectLanguage(text), [text]);
+  const writtenIn = pickedLang || detected.lang;
   const [justSent, setJustSent] = useState(false);
 
   const r = useMemo(() => analyze(text), [text]);
   const empty = !text.trim();
   const blocked = isBlocked(r);
-  const canSend = !empty && text.trim().length >= 15 && !blocked && !!category && !!profile;
+  const canSend = !empty && text.trim().length >= 15 && !blocked && !!category && !!profile && !!writtenIn;
   const state = (bad) => (empty ? "idle" : bad ? "bad" : "");
   const list = (arr) => <em>{arr.join(", ")}</em>;
   const parts = (p) => <>{p[0]}{p[1]}{p[2]}</>;
 
   const send = () => {
     onPublish({
-      id: "m" + Date.now(), text: text.trim(), cat: category, duration, createdAt: Date.now(),
+      id: "m" + Date.now(), text: text.trim(), cat: category, duration, createdAt: Date.now(), orig: writtenIn,
       gender: profile.gender, age: profile.age, country: profile.country,
     });
     setText("");
+    setPickedLang(null);
     setJustSent(true);
   };
 
@@ -567,6 +569,21 @@ function Write({ profile, onEditProfile, onSeeMine, onPublish }) {
           onChange={(e) => { setText(e.target.value); setJustSent(false); }}
         />
         <div className="count">{text.length} / 280</div>
+
+        {!empty && (
+          <div className="langline">
+            <p className="intro-line">
+              {writtenIn
+                ? <>{t.wlang.writtenIn} <b className="ink">{cap(languageName(writtenIn, lang))}</b>{!pickedLang && <> · {t.wlang.auto}</>}</>
+                : t.wlang.unknown}
+            </p>
+            <div className="pick small" role="group" aria-label={t.wlang.label}>
+              {LANGUAGES.map((l) => (
+                <button key={l} aria-pressed={writtenIn === l} onClick={() => setPickedLang(l)}>{cap(languageName(l, lang))}</button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {profile && (
           <p className="intro-line">
@@ -605,7 +622,7 @@ function Write({ profile, onEditProfile, onSeeMine, onPublish }) {
         {r.selfHarm && <HelpBox />}
 
         <button className="primary" disabled={!canSend} onClick={send}>
-          {!category ? t.missing.cat : t.send}
+          {!category ? t.missing.cat : !writtenIn && !empty ? t.wlang.missing : t.send}
         </button>
 
         {justSent && (
@@ -644,20 +661,10 @@ function HelpBox({ forOthers }) {
 
 /* ---------- me: profile, privacy, rules, language ---------- */
 
-// Countries grouped by the languages their people write in, for one-tap selection.
-const LANGUAGE_GROUPS = {
-  it: ["IT", "CH"],
-  de: ["DE", "AT", "CH"],
-  fr: ["FR", "CH", "CA"],
-  en: ["GB", "IE", "US", "CA", "AU"],
-  es: ["ES"],
-  pt: ["PT"],
-};
-
-function PlacesPicker({ places, onChange, focus, onFocused }) {
+function LanguagePicker({ value, onChange, focus, onFocused }) {
   const { lang, t } = useLang();
   const ref = useRef(null);
-  const world = places.includes("world");
+  const all = value.includes("all");
 
   useEffect(() => {
     if (!focus) return;
@@ -667,54 +674,41 @@ function PlacesPicker({ places, onChange, focus, onFocused }) {
 
   const counts = useMemo(() => {
     const c = {};
-    SECRETS.forEach((s) => { c[s.country] = (c[s.country] || 0) + 1; });
+    SECRETS.forEach((s) => { c[s.orig] = (c[s.orig] || 0) + 1; });
     return c;
   }, []);
-  const countries = useMemo(
-    () => [...new Set([...COUNTRIES, ...Object.keys(counts)])]
-      .map((code) => ({ code, name: countryName(code, lang) }))
-      .sort((a, b) => a.name.localeCompare(b.name, lang)),
-    [counts, lang]
+  // Phone language first, then the others alphabetically.
+  const langs = useMemo(
+    () => [lang, ...LANGUAGES.filter((l) => l !== lang).sort((a, b) => languageName(a, lang).localeCompare(languageName(b, lang), lang))],
+    [lang]
   );
 
-  const chosen = world ? [] : places;
-  const set = (list) => onChange(list.length ? list : ["world"]);
-  const toggle = (code) => set(chosen.includes(code) ? chosen.filter((c) => c !== code) : [...chosen, code]);
-  const groupOn = (codes) => codes.every((c) => chosen.includes(c));
-  const toggleGroup = (codes) =>
-    set(groupOn(codes) ? chosen.filter((c) => !codes.includes(c)) : [...new Set([...chosen, ...codes])]);
+  const chosen = all ? [] : value;
+  const toggle = (l) => {
+    const next = chosen.includes(l) ? chosen.filter((x) => x !== l) : [...chosen, l];
+    onChange(next.length ? next : ["all"]);
+  };
 
   return (
-    <section className="card" id="places" ref={ref}>
+    <section className="card" id="read-langs" ref={ref}>
       <h2>{t.where.title}</h2>
       <p className="intro-line">{t.where.lede}</p>
 
-      <label className={"agree world" + (world ? " on" : "")} htmlFor="place-world">
-        <input id="place-world" type="checkbox" checked={world} onChange={() => onChange(world ? (chosen.length ? chosen : ["CH"]) : ["world"])} />
-        <span>🌍 <b>{t.where.world}</b> <small className="muted">· {t.secretsCount(SECRETS.length)}</small></span>
+      <label className={"agree world" + (all ? " on" : "")} htmlFor="lang-all">
+        <input id="lang-all" type="checkbox" checked={all} onChange={() => onChange(all ? [lang] : ["all"])} />
+        <span>🌍 <b>{t.where.all}</b> <small className="muted">· {t.secretsCount(SECRETS.length)}</small></span>
       </label>
 
-      <h3>{t.where.byLanguage}</h3>
-      <div className="pick" role="group" aria-label={t.where.byLanguage}>
-        {Object.entries(LANGUAGE_GROUPS).map(([code, list]) => (
-          <button key={code} aria-pressed={!world && groupOn(list)} onClick={() => toggleGroup(list)}>
-            {cap(languageName(code, lang))} <span aria-hidden="true">{list.map(flag).join("")}</span>
-          </button>
-        ))}
-      </div>
-
-      <h3>{t.where.byCountry}</h3>
       <div className="countries">
-        {countries.map((c) => (
-          <label key={c.code} className={"country" + (chosen.includes(c.code) ? " on" : "")} htmlFor={"pl-" + c.code}>
-            <input id={"pl-" + c.code} type="checkbox" checked={chosen.includes(c.code)} onChange={() => toggle(c.code)} />
-            <span className="cflag" aria-hidden="true">{flag(c.code)}</span>
-            <span className="cname">{c.name}</span>
-            <span className="ccount">{counts[c.code] || 0}</span>
+        {langs.map((l) => (
+          <label key={l} className={"country" + (chosen.includes(l) ? " on" : "")} htmlFor={"rl-" + l}>
+            <input id={"rl-" + l} type="checkbox" checked={chosen.includes(l)} onChange={() => toggle(l)} />
+            <span className="cname">{cap(languageName(l, lang))}</span>
+            <span className="ccount">{counts[l] || 0}</span>
           </label>
         ))}
       </div>
-      <p className="note-small">{world ? t.where.summaryWorld : t.where.summary(places.length)}</p>
+      <p className="note-small">{t.where.note}</p>
     </section>
   );
 }
@@ -780,7 +774,7 @@ function MySecrets({ items, onDelete }) {
   );
 }
 
-function Me({ profile, onSave, mySecrets, onDelete, places, onPlaces, focusPlaces, onFocused, onDemoBan, onReplayWelcome }) {
+function Me({ profile, onSave, mySecrets, onDelete, readLangs, onReadLangs, focusLangs, onFocused, onDemoBan, onReplayWelcome }) {
   const { lang, t } = useLang();
   const [editing, setEditing] = useState(false);
 
@@ -798,7 +792,7 @@ function Me({ profile, onSave, mySecrets, onDelete, places, onPlaces, focusPlace
           onCancel={() => setEditing(false)} onSave={(p) => { onSave(p); setEditing(false); }} />
       )}
 
-      <PlacesPicker places={places} onChange={onPlaces} focus={focusPlaces} onFocused={onFocused} />
+      <LanguagePicker value={readLangs} onChange={onReadLangs} focus={focusLangs} onFocused={onFocused} />
 
       <MySecrets items={mySecrets} onDelete={onDelete} />
 

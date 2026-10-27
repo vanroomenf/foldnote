@@ -421,33 +421,42 @@ STRINGS.it.mine = {
   demoNote: "Prototipo: la revisione dura pochi secondi e le reazioni sono simulate.",
 };
 
-/* ---------- where to read from ---------- */
+/* ---------- which languages to read ---------- */
 
 STRINGS.en.where = {
-  title: "Where you read from",
-  lede: "Pick one or more countries, or the whole world. Secrets always appear in the language they were written in.",
-  byLanguage: "Quick pick by language",
-  byCountry: "Countries",
+  title: "Languages you read",
+  lede: "Pick the languages you want to read secrets in, or read everything. Secrets always appear exactly as they were written.",
+  all: "All languages",
+  label: "Reading in",
   change: "Change",
-  summaryWorld: "You're reading secrets from everywhere.",
-  summary: (n) => (n === 1 ? "You're reading secrets from 1 country." : `You're reading secrets from ${n} countries.`),
-  label: "From",
-  world: "The whole world",
+  note: "Each secret's language is recognised automatically when it's written, and the author can correct it.",
   emptyTitle: "No secrets here yet.",
-  emptyText: "Nobody from the places you picked has posted in this category yet. Try another one, or read from the whole world.",
-  seeWorld: "Read from the whole world",
+  emptyText: "Nobody has written in this category in your languages yet. Try another category, or read in all languages.",
+  seeAll: "Read in all languages",
 };
 STRINGS.it.where = {
-  title: "Da dove leggi i segreti",
-  lede: "Scegli una o più nazioni, oppure tutto il mondo. I segreti si vedono sempre nella lingua in cui sono stati scritti.",
-  byLanguage: "Scelta rapida per lingua",
-  byCountry: "Nazioni",
+  title: "Lingue in cui leggi",
+  lede: "Scegli le lingue in cui vuoi leggere i segreti, oppure leggili tutti. I segreti si vedono sempre esattamente come sono stati scritti.",
+  all: "Tutte le lingue",
+  label: "Leggi in",
   change: "Cambia",
-  summaryWorld: "Stai leggendo segreti da tutto il mondo.",
-  summary: (n) => (n === 1 ? "Stai leggendo segreti da 1 nazione." : `Stai leggendo segreti da ${n} nazioni.`),
-  label: "Da",
-  world: "Tutto il mondo",
+  note: "La lingua di ogni segreto viene riconosciuta da sola quando viene scritto, e l'autore può correggerla.",
   emptyTitle: "Ancora nessun segreto qui.",
-  emptyText: "Nessuno dai posti che hai scelto ha ancora scritto in questa categoria. Provane un'altra, o leggi da tutto il mondo.",
-  seeWorld: "Leggi da tutto il mondo",
+  emptyText: "Nessuno ha ancora scritto in questa categoria nelle tue lingue. Prova un'altra categoria, o leggi in tutte le lingue.",
+  seeAll: "Leggi in tutte le lingue",
+};
+
+STRINGS.en.wlang = {
+  label: "Language",
+  writtenIn: "Written in",
+  auto: "recognised automatically, tap to correct",
+  unknown: "Which language is this in? Write a little more, or pick it:",
+  missing: "Choose the language to send",
+};
+STRINGS.it.wlang = {
+  label: "Lingua",
+  writtenIn: "Scritto in",
+  auto: "riconosciuto in automatico, tocca per correggere",
+  unknown: "In che lingua è? Scrivi ancora un po', oppure sceglila:",
+  missing: "Scegli la lingua per inviare",
 };

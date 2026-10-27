@@ -32,9 +32,9 @@ The site will be at `https://<username>.github.io/foldnote/`.
 
 By design, Foldnote has no private messages, comments or followers, so nobody can use a secret to reach its author. The filter also blocks invitations to get in touch ("DM me", "scrivimi", social handles), and trying to contact someone is an immediate ban.
 
-## Language and countries
+## Languages
 
-The interface follows the phone's language (`navigator.languages`), falling back to English. Secrets are never translated: each one is shown in the language its author wrote it in. Under Me you choose where to read secrets from: the whole world, or one or more countries, with quick picks by language (for example Italian adds Italy and Switzerland). It starts with the country in your profile, and the reader shows the current choice with a shortcut to change it.
+The interface follows the phone's language (`navigator.languages`), falling back to English. Secrets are never translated. When someone writes a secret, its language is recognised automatically (`src/language.js`) and shown to the author, who can correct it. Under Me, readers choose which languages they want to read, or all languages; it starts with the phone's language.
 
 ## Before going live
 
