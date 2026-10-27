@@ -34,7 +34,7 @@ By design, Foldnote has no private messages, comments or followers, so nobody ca
 
 ## Language
 
-The app reads the device language (`navigator.languages`) and uses the first one it supports, falling back to English. Users can override it under Rules → Language. To add a language, add a block in `src/i18n.js` and the matching texts in `src/data.js`.
+The app always uses the phone's language (`navigator.languages`), falling back to English; there is no language picker. Secrets written in another language are shown translated, with a "See original" button on each one, and readers can choose under Me to see every post in its original language instead. In the prototype the translations are pre-written; a real app would translate with a service when a secret is published. To add an interface language, add a block in `src/i18n.js` and the matching texts in `src/data.js`.
 
 ## Before going live
 

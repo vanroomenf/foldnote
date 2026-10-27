@@ -115,12 +115,30 @@ export const SECRETS = [
     it: "Rispondo «sto arrivando» quando non sono ancora uscito dalla doccia." },
 ];
 
+// Secrets originally written in languages other than English or Italian.
+const ORIGINALS = {
+  16: ["de", "Seit zwölf Jahren verheiratet, und mein Herz macht immer noch einen Sprung, wenn ich seinen Schlüssel in der Tür höre."],
+  9: ["fr", "Quand quelqu'un me dit « on fait un appel rapide ? », je sens littéralement mon cœur s'accélérer."],
+  22: ["de", "Ich habe drei Sätze Japanisch gelernt, für jemanden, den ich zweimal im Zug gesehen habe. Ich habe sie nie benutzt."],
+  19: ["de", "Ich habe jemandem zurückgewinkt, der eigentlich der Person hinter mir gewunken hat. Ich habe so getan, als würde ich mir die Haare richten. Drei Jahre später denke ich immer noch daran."],
+  4: ["de", "Nach der Scheidung habe ich gemerkt, dass ich kochen kann. Ich brauchte nur niemanden, der mir dabei zusieht."],
+  18: ["de", "Am Tag unserer Trennung habe ich eine Stunde lang geweint. Danach habe ich so gut geschlafen wie seit zwei Jahren nicht mehr."],
+  11: ["de", "Jedes Jahr schicke ich meiner Grundschullehrerin eine Geburtstagskarte. Ich weiß nicht, ob sie sie liest. Ich unterschreibe nie."],
+  6: ["fr", "Je parle à mes plantes. Une fois, je me suis excusé auprès d'un basilic parce que je l'avais oublié au soleil."],
+  8: ["es", "Mi padre nunca me ha dicho que está orgulloso de mí. Ayer le oí decírselo a un vecino. Lloré en el coche."],
+  14: ["pt", "Tenho medo de que os meus filhos cresçam e deixem de precisar de mim. Depois sinto-me culpada, porque é exatamente isso que quero para eles."],
+};
+
 // Prototype extras: non-binary authors and starting counts for the newer reactions.
 const NON_BINARY = new Set([9, 22]);
 for (const s of SECRETS) {
   if (NON_BINARY.has(s.id)) s.gender = "nb";
   // Time left before the sample secret disappears (between 3 hours and about 29 days).
   s.expiresAt = Date.now() + (((s.id * 53) % 700) + 3) * 36e5;
+  // Language the author wrote in. Readers see it translated unless they ask for the original.
+  const o = ORIGINALS[s.id];
+  if (o) { s.orig = o[0]; s[o[0]] = o[1]; }
+  else s.orig = s.country === "IT" || s.country === "CH" ? "it" : "en";
   s.r.strong ??= Math.round(s.r.hug * 0.35 + s.views * 0.01);
   s.r.safe ??= Math.round(s.views * 0.04 + s.r.wow * 0.3);
   // Newer reactions, weighted by category so each secret has its own top reactions.

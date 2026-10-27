@@ -3,7 +3,7 @@ import {
   CATEGORIES, REACTIONS, SECRETS, GENDERS, AGE_BANDS, COUNTRIES, AVATARS,
 } from "./data.js";
 import { analyze, isBlocked } from "./filter.js";
-import { STRINGS, SUPPORTED, LANGUAGE_NAMES, deviceLanguage } from "./i18n.js";
+import { STRINGS, deviceLanguage } from "./i18n.js";
 
 /* ---------- helpers ---------- */
 
@@ -26,6 +26,7 @@ function usePersistentState(key, initial) {
 }
 
 const AD_EVERY = 5;
+const TINTS = 7; // paper colors that rotate from card to card (tint-1 … tint-7)
 
 const LangContext = createContext({ lang: "en", t: STRINGS.en });
 const useLang = () => useContext(LangContext);
@@ -34,6 +35,11 @@ const catText = (key, lang) => {
   const c = CATEGORIES.find((x) => x.key === key);
   return c ? c[lang] || c.en : ["", ""];
 };
+
+function languageName(code, lang) {
+  try { return new Intl.DisplayNames([lang], { type: "language" }).of(code) || code; }
+  catch { return code; }
+}
 
 function countryName(code, lang) {
   try { return new Intl.DisplayNames([lang], { type: "region" }).of(code) || code; }
@@ -92,10 +98,11 @@ function demoReactions(sec, liveAt, now) {
 /* ---------- app ---------- */
 
 export default function App() {
-  const [langSetting, setLangSetting] = usePersistentState("lang", "auto");
-  const device = useMemo(deviceLanguage, []);
-  const lang = langSetting === "auto" ? device : langSetting;
+  // The app always speaks the phone's language. Posts in other languages are
+  // translated unless the reader prefers to see originals.
+  const lang = useMemo(deviceLanguage, []);
   const t = STRINGS[lang];
+  const [translate, setTranslate] = usePersistentState("translate", true);
 
   const [accepted, setAccepted] = usePersistentState("accepted", false);
   const [profile, setProfile] = usePersistentState("profile", null);
@@ -112,7 +119,7 @@ export default function App() {
   }, [toast]);
 
   return (
-    <LangContext.Provider value={{ lang, t }}>
+    <LangContext.Provider value={{ lang, t, translate }}>
       <div className="app">
         <header className="topbar">
           <div className="brand"><Logo /><span>Foldnote</span></div>
@@ -140,9 +147,8 @@ export default function App() {
             onSave={setProfile}
             mySecrets={mySecrets}
             onDelete={(id) => { setMySecrets((all) => all.filter((x) => x.id !== id)); setToast(t.mine.deletedToast); }}
-            langSetting={langSetting}
-            device={device}
-            onLang={setLangSetting}
+            translate={translate}
+            onTranslate={setTranslate}
             onDemoBan={() => setBanned(true)}
             onReplayWelcome={() => setAccepted(false)}
           />
@@ -256,7 +262,7 @@ function Reader({ onToast, onWrite }) {
   const slides = useMemo(() => {
     const out = [];
     list.forEach((s, i) => {
-      out.push({ type: "secret", secret: s });
+      out.push({ type: "secret", secret: s, n: i });
       if ((i + 1) % AD_EVERY === 0 && i < list.length - 1) out.push({ type: "ad", id: "ad" + i });
     });
     out.push({ type: "end" });
@@ -304,6 +310,7 @@ function Reader({ onToast, onWrite }) {
             {slide.type === "secret" && !reports[slide.secret.id] && (
               <SecretCard
                 secret={slide.secret}
+                tint={(slide.n % TINTS) + 1}
                 selected={mine[slide.secret.id] || {}}
                 onReact={(k) => toggle(slide.secret.id, k)}
                 onCategory={pick}
@@ -342,8 +349,12 @@ function Reader({ onToast, onWrite }) {
   );
 }
 
-function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, first }) {
-  const { lang, t } = useLang();
+function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, first, tint }) {
+  const { lang, t, translate } = useLang();
+  const foreign = secret.orig && secret.orig !== lang && secret[lang];
+  const [flipped, setFlipped] = useState(false);
+  const showOriginal = foreign && (translate ? flipped : !flipped);
+  const body = showOriginal || !foreign ? secret[secret.orig] || secret.en : secret[lang];
   const count = (k) => secret.r[k] + (selected[k] ? 1 : 0);
   const [label, setLabel] = useState(null);
 
@@ -360,16 +371,24 @@ function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, f
   }, [label]);
 
   return (
-    <article className="note">
+    <article className={"note tint-" + tint}>
       <div className="meta">
         <button className="cattag" onClick={() => onCategory(secret.cat)}>{catText(secret.cat, lang)[0]}</button>
         <span className={"gender g-" + secret.gender}>{t.gender[secret.gender]}</span>
         <span>{secret.age}{t.ageSuffix}</span>
         <span>{countryName(secret.country, lang)}</span>
-        <span className="left" title={t.mine.expiresIn}>⏳ {timeLeft(Math.max(6e4, secret.expiresAt - Date.now()), t)}</span>
       </div>
 
-      <p className="text">{secret[lang] || secret.en}</p>
+      <p className="text" lang={showOriginal || !foreign ? secret.orig : lang}>{body}</p>
+
+      {foreign && (
+        <p className="translated">
+          <span>{showOriginal ? t.tr.original(languageName(secret.orig, lang)) : t.tr.translatedFrom(languageName(secret.orig, lang))}</span>
+          <button className="link inline" onClick={() => setFlipped((f) => !f)}>
+            {showOriginal ? t.tr.showTranslation : t.tr.showOriginal}
+          </button>
+        </p>
+      )}
 
       <div className="note-bottom">
         <div className="reacts-wrap">
@@ -669,8 +688,8 @@ function MySecrets({ items, onDelete }) {
   );
 }
 
-function Me({ profile, onSave, mySecrets, onDelete, langSetting, device, onLang, onDemoBan, onReplayWelcome }) {
-  const { t } = useLang();
+function Me({ profile, onSave, mySecrets, onDelete, translate, onTranslate, onDemoBan, onReplayWelcome }) {
+  const { lang, t } = useLang();
   const [editing, setEditing] = useState(false);
 
   return (
@@ -713,12 +732,13 @@ function Me({ profile, onSave, mySecrets, onDelete, langSetting, device, onLang,
         <button className="link left" onClick={onReplayWelcome}>{t.replayWelcome}</button>
       </section>
       <section className="card">
-        <h3>{t.languageTitle}</h3>
-        <div className="langs" role="radiogroup" aria-label={t.languageTitle}>
-          {["auto", ...SUPPORTED].map((k) => (
-            <label key={k} className="agree" htmlFor={"lang-" + k}>
-              <input id={"lang-" + k} type="radio" name="lang" checked={langSetting === k} onChange={() => onLang(k)} />
-              <span>{k === "auto" ? t.languageAuto(LANGUAGE_NAMES[device]) : LANGUAGE_NAMES[k]}</span>
+        <h3>{t.tr.settingTitle}</h3>
+        <p className="intro-line">{t.tr.appLanguage(languageName(lang, lang))}</p>
+        <div className="langs" role="radiogroup" aria-label={t.tr.settingTitle}>
+          {[[true, t.tr.optTranslate], [false, t.tr.optOriginal]].map(([v, label]) => (
+            <label key={String(v)} className="agree" htmlFor={"tr-" + v}>
+              <input id={"tr-" + v} type="radio" name="translate" checked={translate === v} onChange={() => onTranslate(v)} />
+              <span>{label}</span>
             </label>
           ))}
         </div>

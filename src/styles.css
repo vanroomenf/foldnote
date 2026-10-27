@@ -6,16 +6,19 @@
   --accent:#1F6C75; --accent-ink:#FFFFFF; --soft:#DCEBEC; --warm:#B8553F; --warm-soft:#F6E2DB;
   --ok:#2E7D4F; --ok-soft:#DDF0E4; --bad:#B23A3A; --bad-soft:#F7DEDE;
   --man:#2F5D8A; --woman:#9A3F68; --nb:#6A5A12; --man-soft:#DFE8F2; --woman-soft:#F3E0E9; --nb-soft:#F2ECCF;
+  --tint-0:#FFFFFF; --tint-1:#F8EEDB; --tint-2:#F7E2E0; --tint-3:#E2EFE3; --tint-4:#DFEBF6; --tint-5:#ECE5F6; --tint-6:#F7F0CC; --tint-7:#DBF0EC;
   --display:"Young Serif", Georgia, "Times New Roman", serif;
   --body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   --r:16px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --tint-0:#18232B; --tint-1:#2B2519; --tint-2:#2F1F23; --tint-3:#1D2B21; --tint-4:#1A2634; --tint-5:#262038; --tint-6:#2C2917; --tint-7:#16302D;
   --bg:#0F171D; --paper:#18232B; --ink:#E3EBEE; --muted:#93A3AD; --line:#2A3943;
   --accent:#62B4BC; --accent-ink:#0F171D; --soft:#1C3236; --warm:#E08A73; --warm-soft:#3A2520;
   --ok:#6CC490; --ok-soft:#183126; --bad:#EE8080; --bad-soft:#3A1D1D;
   --man:#8DB6E0; --woman:#E39BBE; --nb:#E0CF7E; --man-soft:#1C2A39; --woman-soft:#35202B; --nb-soft:#302B14; color-scheme:dark}}
 :root[data-theme="dark"]{
+  --tint-0:#18232B; --tint-1:#2B2519; --tint-2:#2F1F23; --tint-3:#1D2B21; --tint-4:#1A2634; --tint-5:#262038; --tint-6:#2C2917; --tint-7:#16302D;
   --bg:#0F171D; --paper:#18232B; --ink:#E3EBEE; --muted:#93A3AD; --line:#2A3943;
   --accent:#62B4BC; --accent-ink:#0F171D; --soft:#1C3236; --warm:#E08A73; --warm-soft:#3A2520;
   --ok:#6CC490; --ok-soft:#183126; --bad:#EE8080; --bad-soft:#3A1D1D;
@@ -207,7 +210,6 @@ textarea.short{min-height:90px;font-family:var(--body);font-size:1rem}
 .reported-icon{font-size:1.8rem;color:var(--warm)}
 
 /* My secrets */
-.meta .left{margin-left:auto;text-transform:none;letter-spacing:0}
 .cattag.static{cursor:default}
 .mylist{display:grid;gap:10px}
 .mysecret{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px}
@@ -223,3 +225,14 @@ textarea.short{min-height:90px;font-family:var(--body);font-size:1rem}
 .primary.danger{background:var(--bad);color:var(--paper)}
 .sent{display:grid;gap:6px}
 .sent .link{justify-self:start}
+
+/* Card colors and translation */
+.note.tint-0{background:var(--tint-0)}.note.tint-1{background:var(--tint-1)}.note.tint-2{background:var(--tint-2)}.note.tint-3{background:var(--tint-3)}
+.note.tint-4{background:var(--tint-4)}.note.tint-5{background:var(--tint-5)}.note.tint-6{background:var(--tint-6)}.note.tint-7{background:var(--tint-7)}
+.note[class*="tint-"]{border-color:transparent}
+.note[class*="tint-"]::before{display:none}
+.note .react{background:color-mix(in srgb,var(--paper) 55%,transparent);border-color:color-mix(in srgb,var(--ink) 12%,transparent)}
+.note .react[aria-pressed="true"]{background:var(--paper);border-color:var(--accent)}
+.note .cattag{background:color-mix(in srgb,var(--paper) 65%,transparent)}
+.translated{margin:-6px 0 0;display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.8rem;color:var(--muted)}
+.translated .link{font-size:.8rem;color:var(--accent);font-weight:700;text-decoration:none}

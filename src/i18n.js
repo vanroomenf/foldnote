@@ -420,3 +420,26 @@ STRINGS.it.mine = {
   seeMine: "Vedi i tuoi segreti",
   demoNote: "Prototipo: la revisione dura pochi secondi e le reazioni sono simulate.",
 };
+
+/* ---------- translation ---------- */
+
+STRINGS.en.tr = {
+  translatedFrom: (l) => `Translated · original in ${l}`,
+  original: (l) => `Original in ${l}`,
+  showOriginal: "See original",
+  showTranslation: "See translation",
+  settingTitle: "Posts in other languages",
+  appLanguage: (l) => `Foldnote uses your phone's language (${l}). Secrets written in other languages are translated for you.`,
+  optTranslate: "Translate them automatically",
+  optOriginal: "Show them in the original language",
+};
+STRINGS.it.tr = {
+  translatedFrom: (l) => `Tradotto · originale in ${l}`,
+  original: (l) => `Originale in ${l}`,
+  showOriginal: "Vedi l'originale",
+  showTranslation: "Vedi la traduzione",
+  settingTitle: "Post in altre lingue",
+  appLanguage: (l) => `Foldnote usa la lingua del tuo telefono (${l}). I segreti scritti in altre lingue vengono tradotti per te.`,
+  optTranslate: "Traducili automaticamente",
+  optOriginal: "Mostrali in lingua originale",
+};
