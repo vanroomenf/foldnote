@@ -34,11 +34,11 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,.deck:focus-visi
 
 .topbar{flex:none;padding-block:12px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
 .brand{font-family:var(--display);font-size:1.6rem;letter-spacing:.01em;line-height:1.1;display:flex;align-items:center;gap:8px}
-.logo{flex:none;width:1.35em;height:1.35em;overflow:visible}
-.logo-back{fill:var(--soft);stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round}
-.logo-front{fill:var(--paper);stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round}
-.logo-ink{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-linecap:round}
-.logo-heart{fill:var(--warm)}
+.logo{flex:none;width:1.3em;height:1.3em;overflow:visible}
+.logo-front{fill:var(--paper)}
+.logo-back{fill:var(--soft)}
+.logo-fold{fill:var(--ink);opacity:.35}
+.logo-edge{fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linejoin:round}
 .brand small{display:block;font-family:var(--body);font-size:.7rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
 nav{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px}
 nav button{border:0;background:transparent;color:var(--muted);padding:7px 12px;border-radius:999px;font-size:.9rem}
@@ -205,3 +205,21 @@ textarea.short{min-height:90px;font-family:var(--body);font-size:1rem}
 .reported h2{font-size:1.5rem}
 .reported p{margin:0;color:var(--muted)}
 .reported-icon{font-size:1.8rem;color:var(--warm)}
+
+/* My secrets */
+.meta .left{margin-left:auto;text-transform:none;letter-spacing:0}
+.cattag.static{cursor:default}
+.mylist{display:grid;gap:10px}
+.mysecret{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px}
+.mysecret.expired{opacity:.65}
+.mysecret-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mysecret-text{margin:0;font-family:var(--display);font-size:1.05rem;line-height:1.45;overflow-wrap:anywhere}
+.mysecret-meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;font-size:.84rem;color:var(--muted)}
+.received{display:flex;gap:10px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.pill.live{background:var(--ok-soft);color:var(--ok)}
+.pill.expired{background:var(--bg);color:var(--muted)}
+.confirm{background:var(--bad-soft);border-radius:10px;padding:10px 12px;display:grid;gap:8px}
+.confirm p{margin:0;font-size:.9rem}
+.primary.danger{background:var(--bad);color:var(--paper)}
+.sent{display:grid;gap:6px}
+.sent .link{justify-self:start}

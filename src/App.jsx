@@ -46,20 +46,47 @@ const compact = (n, lang) => {
   catch { return String(n); }
 };
 
-/* ---------- logo: a little folded card with a heart, like a note passed in class ---------- */
+/* ---------- logo: an F folded from a strip of paper ---------- */
 
 function Logo() {
   return (
     <svg className="logo" viewBox="0 0 32 32" aria-hidden="true">
-      <g transform="rotate(-8 16 16)">
-        <path className="logo-back" d="M19 6L27 9.5L27 24.5L19 27Z" />
-        <path className="logo-front" d="M5 6L19 6L19 27L5 27Z" />
-        <path className="logo-ink" d="M8 11.5h8M8 21.5h6" />
-        <path className="logo-heart" transform="translate(12 16) scale(1.25)"
-          d="M0 2.6c-1.2-.9-2.6-1.9-2.6-3.2a1.3 1.3 0 0 1 2.6-.6a1.3 1.3 0 0 1 2.6.6c0 1.3-1.3 2.3-2.6 3.2z" />
-      </g>
+      <path className="logo-front" d="M7 6L13 5.5V27H7Z" />
+      <path className="logo-back" d="M13 5.5L26 4V10L13 11.5Z" />
+      <path className="logo-back" d="M13 15L22 14V19.5L13 20.5Z" />
+      <path className="logo-fold" d="M13 5.5L13 11.5L15.5 8.4Z M13 15L13 20.5L15.2 17.6Z" />
+      <path className="logo-edge" d="M7 6L13 5.5L26 4V10L13 11.5V15L22 14V19.5L13 20.5V27H7Z" />
     </svg>
   );
+}
+
+/* ---------- my secrets: timing (demo moderation takes a few seconds) ---------- */
+
+const REVIEW_MS = 8000;
+const DURATIONS = { "1d": 864e5, "7d": 7 * 864e5, "30d": 30 * 864e5, "1y": 365 * 864e5 };
+
+function secretStatus(sec, now) {
+  if (now < sec.createdAt + REVIEW_MS) return { status: "review" };
+  const liveAt = sec.createdAt + REVIEW_MS;
+  const expiresAt = liveAt + DURATIONS[sec.duration];
+  return now >= expiresAt ? { status: "expired", liveAt } : { status: "live", liveAt, left: expiresAt - now };
+}
+
+function timeLeft(ms, t) {
+  const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5), m = Math.max(1, Math.floor(ms / 6e4));
+  return d >= 1 ? t.left.days(d) : h >= 1 ? t.left.hours(h) : t.left.minutes(m);
+}
+
+// Demo only: reactions trickle in after a secret goes live.
+function demoReactions(sec, liveAt, now) {
+  const seconds = Math.max(0, (now - liveAt) / 1000);
+  const base = Math.min(Math.floor(seconds / 2), 400);
+  const out = {};
+  REACTIONS.forEach((r, i) => {
+    const w = ((sec.createdAt / 1000 + i * 97) % 13) / 13;
+    out[r.key] = Math.floor(base * w * w);
+  });
+  return out;
 }
 
 /* ---------- app ---------- */
@@ -72,6 +99,7 @@ export default function App() {
 
   const [accepted, setAccepted] = usePersistentState("accepted", false);
   const [profile, setProfile] = usePersistentState("profile", null);
+  const [mySecrets, setMySecrets] = usePersistentState("mysecrets", []);
   const [tab, setTab] = useState("read");
   const [banned, setBanned] = useState(false);
   const [toast, setToast] = useState("");
@@ -98,11 +126,20 @@ export default function App() {
         {tab === "read" && (
           <Reader onToast={setToast} onWrite={() => setTab("write")} />
         )}
-        {tab === "write" && <Write profile={profile} onEditProfile={() => setTab("me")} />}
+        {tab === "write" && (
+          <Write
+            profile={profile}
+            onEditProfile={() => setTab("me")}
+            onSeeMine={() => setTab("me")}
+            onPublish={(sec) => setMySecrets((all) => [sec, ...all])}
+          />
+        )}
         {tab === "me" && (
           <Me
             profile={profile}
             onSave={setProfile}
+            mySecrets={mySecrets}
+            onDelete={(id) => { setMySecrets((all) => all.filter((x) => x.id !== id)); setToast(t.mine.deletedToast); }}
             langSetting={langSetting}
             device={device}
             onLang={setLangSetting}
@@ -329,6 +366,7 @@ function SecretCard({ secret, selected, onReact, onCategory, onReport, onNext, f
         <span className={"gender g-" + secret.gender}>{t.gender[secret.gender]}</span>
         <span>{secret.age}{t.ageSuffix}</span>
         <span>{countryName(secret.country, lang)}</span>
+        <span className="left" title={t.mine.expiresIn}>⏳ {timeLeft(Math.max(6e4, secret.expiresAt - Date.now()), t)}</span>
       </div>
 
       <p className="text">{secret[lang] || secret.en}</p>
@@ -454,12 +492,12 @@ function AdSlide({ onNext }) {
 
 /* ---------- write ---------- */
 
-function Write({ profile, onEditProfile }) {
+function Write({ profile, onEditProfile, onSeeMine, onPublish }) {
   const { lang, t } = useLang();
   const [text, setText] = useState("");
   const [category, setCategory] = useState("");
+  const [duration, setDuration] = useState("30d");
   const [justSent, setJustSent] = useState(false);
-  const [sent, setSent] = usePersistentState("sent", []);
 
   const r = useMemo(() => analyze(text), [text]);
   const empty = !text.trim();
@@ -470,7 +508,10 @@ function Write({ profile, onEditProfile }) {
   const parts = (p) => <>{p[0]}{p[1]}{p[2]}</>;
 
   const send = () => {
-    setSent((s) => [{ text: text.trim(), cat: category, gender: profile.gender }, ...s]);
+    onPublish({
+      id: "m" + Date.now(), text: text.trim(), cat: category, duration, createdAt: Date.now(),
+      gender: profile.gender, age: profile.age, country: profile.country,
+    });
     setText("");
     setJustSent(true);
   };
@@ -508,6 +549,14 @@ function Write({ profile, onEditProfile }) {
         </div>
         <p className="intro-line">{category ? catText(category, lang)[1] : t.chooseWhere}</p>
 
+        <h3>{t.dur.title}</h3>
+        <div className="segmented" role="group" aria-label={t.dur.title}>
+          {Object.keys(DURATIONS).map((k) => (
+            <button key={k} aria-pressed={duration === k} onClick={() => setDuration(k)}>{t.dur.options[k]}</button>
+          ))}
+        </div>
+        <p className="intro-line">{t.dur.hint}</p>
+
         <h3>{t.autoCheck}</h3>
         <ul className="checks">
           <Check state={state(r.names.length)}>{r.names.length ? parts(t.chk.nameBad(list(r.names))) : t.chk.nameOk}</Check>
@@ -523,25 +572,13 @@ function Write({ profile, onEditProfile }) {
           {!category ? t.missing.cat : t.send}
         </button>
 
-        {justSent && <div className="sent"><p><strong>{t.received}</strong> {t.receivedText}</p></div>}
-      </section>
-
-      {sent.length > 0 && (
-        <section className="card">
-          <h3>{t.yourSecrets}</h3>
-          <div className="mine">
-            {sent.map((s, i) => (
-              <div className="mine-item" key={i}>
-                <p>
-                  {s.cat && <span className="mine-cat">{catText(s.cat, lang)[0]}{s.gender ? " · " + t.gender[s.gender] : ""}</span>}
-                  {s.text}
-                </p>
-                <span className="pill">{t.inReview}</span>
-              </div>
-            ))}
+        {justSent && (
+          <div className="sent">
+            <p><strong>{t.received}</strong> {t.receivedText}</p>
+            <button className="link inline" onClick={onSeeMine}>{t.mine.seeMine}</button>
           </div>
-        </section>
-      )}
+        )}
+      </section>
     </main>
   );
 }
@@ -571,7 +608,68 @@ function HelpBox({ forOthers }) {
 
 /* ---------- me: profile, privacy, rules, language ---------- */
 
-function Me({ profile, onSave, langSetting, device, onLang, onDemoBan, onReplayWelcome }) {
+function MySecrets({ items, onDelete }) {
+  const { lang, t } = useLang();
+  const [now, setNow] = useState(Date.now());
+  const [confirm, setConfirm] = useState(null);
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 2000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <section className="card">
+      <h2>{t.mine.title}</h2>
+      {items.length === 0 && <p className="intro-line">{t.mine.empty}</p>}
+      <div className="mylist">
+        {items.map((sec) => {
+          const st = secretStatus(sec, now);
+          const reacts = st.liveAt ? demoReactions(sec, st.liveAt, now) : {};
+          const total = Object.values(reacts).reduce((a, b) => a + b, 0);
+          const top = REACTIONS.filter((r) => reacts[r.key] > 0).sort((a, b) => reacts[b.key] - reacts[a.key]).slice(0, 4);
+          return (
+            <article key={sec.id} className={"mysecret " + st.status}>
+              <div className="mysecret-head">
+                <span className="cattag static">{catText(sec.cat, lang)[0]}</span>
+                <span className={"pill " + st.status}>
+                  {st.status === "review" ? t.mine.review : st.status === "live" ? t.mine.live : t.mine.expired}
+                </span>
+              </div>
+              <p className="mysecret-text">{sec.text}</p>
+              <div className="mysecret-meta">
+                <span>
+                  {st.status === "review" && t.mine.reviewText}
+                  {st.status === "live" && <>⏳ {t.mine.expiresIn} {timeLeft(st.left, t)}</>}
+                  {st.status === "expired" && t.mine.expiredText}
+                </span>
+                {st.liveAt && (
+                  <span className="received" aria-label={t.mine.reactionsLabel(total)}>
+                    {top.map((r) => <span key={r.key}>{r.emoji} {compact(reacts[r.key], lang)}</span>)}
+                    {total === 0 && <span className="muted">{t.mine.noReactions}</span>}
+                  </span>
+                )}
+              </div>
+              {confirm === sec.id ? (
+                <div className="confirm">
+                  <p>{t.mine.confirm}</p>
+                  <div className="row-actions wrap">
+                    <button className="ghost" onClick={() => setConfirm(null)}>{t.cancel}</button>
+                    <button className="primary danger" onClick={() => { setConfirm(null); onDelete(sec.id); }}>{t.mine.deleteNow}</button>
+                  </div>
+                </div>
+              ) : (
+                <button className="link left" onClick={() => setConfirm(sec.id)}>{t.mine.delete}</button>
+              )}
+            </article>
+          );
+        })}
+      </div>
+      {items.length > 0 && <p className="note-small">{t.mine.demoNote}</p>}
+    </section>
+  );
+}
+
+function Me({ profile, onSave, mySecrets, onDelete, langSetting, device, onLang, onDemoBan, onReplayWelcome }) {
   const { t } = useLang();
   const [editing, setEditing] = useState(false);
 
@@ -588,6 +686,8 @@ function Me({ profile, onSave, langSetting, device, onLang, onDemoBan, onReplayW
         <ProfileForm initial={profile} submitLabel={t.saveProfile}
           onCancel={() => setEditing(false)} onSave={(p) => { onSave(p); setEditing(false); }} />
       )}
+
+      <MySecrets items={mySecrets} onDelete={onDelete} />
 
       <section className="card">
         <h3>{t.privacyTitle}</h3>

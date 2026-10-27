@@ -1,6 +1,6 @@
 # Foldnote
 
-Prototype of an anonymous secrets app: one secret per screen (swipe up for the next), twelve kind reactions instead of comments, all visible as emoji chips, a full report flow (reasons, optional details, hide for the reporter), categories, a private profile (nickname, avatar, gender including non-binary, age band, country) that only its owner sees, a safety filter, and a zero-tolerance rules flow.
+Prototype of an anonymous secrets app: one secret per screen (swipe up for the next), twelve kind reactions instead of comments, all visible as emoji chips, a full report flow (reasons, optional details, hide for the reporter), secrets that expire after a time the author picks (24 hours, 7 days, 30 days or 1 year), and a private list of your own secrets where you can follow and delete them, categories, a private profile (nickname, avatar, gender including non-binary, age band, country) that only its owner sees, a safety filter, and a zero-tolerance rules flow.
 
 ## Run it
 

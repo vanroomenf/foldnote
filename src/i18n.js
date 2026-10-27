@@ -369,3 +369,54 @@ STRINGS.it.rep = {
 
 STRINGS.en.allReactions = "Reactions";
 STRINGS.it.allReactions = "Reazioni";
+
+/* ---------- my secrets and duration ---------- */
+
+STRINGS.en.dur = {
+  title: "How long it stays up",
+  options: { "1d": "24 hours", "7d": "7 days", "30d": "30 days", "1y": "1 year" },
+  hint: "After that it disappears for everyone. You can delete it sooner from Me.",
+};
+STRINGS.it.dur = {
+  title: "Quanto resta online",
+  options: { "1d": "24 ore", "7d": "7 giorni", "30d": "30 giorni", "1y": "1 anno" },
+  hint: "Poi sparisce per tutti. Puoi cancellarlo prima dalla sezione Io.",
+};
+STRINGS.en.left = { days: (n) => (n === 1 ? "1 day" : `${n} days`), hours: (n) => (n === 1 ? "1 hour" : `${n} hours`), minutes: (n) => `${n} min` };
+STRINGS.it.left = { days: (n) => (n === 1 ? "1 giorno" : `${n} giorni`), hours: (n) => (n === 1 ? "1 ora" : `${n} ore`), minutes: (n) => `${n} min` };
+STRINGS.en.mine = {
+  title: "Your secrets",
+  empty: "You haven't posted anything yet. Your secrets will show up here, and only you can see this list.",
+  review: "In review",
+  live: "Live",
+  expired: "Expired",
+  reviewText: "A moderator is reading it.",
+  expiresIn: "Disappears in",
+  expiredText: "No longer visible to anyone.",
+  noReactions: "No reactions yet",
+  reactionsLabel: (n) => `${n} reactions received`,
+  delete: "Delete",
+  confirm: "Delete this secret for good? It will disappear for everyone, along with its reactions.",
+  deleteNow: "Delete for good",
+  deletedToast: "Secret deleted.",
+  seeMine: "See your secrets",
+  demoNote: "Prototype: moderation takes a few seconds and reactions are simulated.",
+};
+STRINGS.it.mine = {
+  title: "I tuoi segreti",
+  empty: "Non hai ancora pubblicato niente. I tuoi segreti compariranno qui, e questa lista la vedi solo tu.",
+  review: "In revisione",
+  live: "Online",
+  expired: "Scaduto",
+  reviewText: "Un moderatore lo sta leggendo.",
+  expiresIn: "Sparisce tra",
+  expiredText: "Non è più visibile a nessuno.",
+  noReactions: "Ancora nessuna reazione",
+  reactionsLabel: (n) => `${n} reazioni ricevute`,
+  delete: "Elimina",
+  confirm: "Eliminare questo segreto per sempre? Sparirà per tutti, insieme alle sue reazioni.",
+  deleteNow: "Elimina per sempre",
+  deletedToast: "Segreto eliminato.",
+  seeMine: "Vedi i tuoi segreti",
+  demoNote: "Prototipo: la revisione dura pochi secondi e le reazioni sono simulate.",
+};

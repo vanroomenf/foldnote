@@ -119,6 +119,8 @@ export const SECRETS = [
 const NON_BINARY = new Set([9, 22]);
 for (const s of SECRETS) {
   if (NON_BINARY.has(s.id)) s.gender = "nb";
+  // Time left before the sample secret disappears (between 3 hours and about 29 days).
+  s.expiresAt = Date.now() + (((s.id * 53) % 700) + 3) * 36e5;
   s.r.strong ??= Math.round(s.r.hug * 0.35 + s.views * 0.01);
   s.r.safe ??= Math.round(s.views * 0.04 + s.r.wow * 0.3);
   // Newer reactions, weighted by category so each secret has its own top reactions.
